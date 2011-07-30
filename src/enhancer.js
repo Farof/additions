@@ -208,7 +208,7 @@
   Object.defineProperties(Number.prototype, {
     bounds: {
       value: function (min, max) {
-        return (new Range(min, max)).limit(this);
+        return (new Number.Range(min, max)).limit(this);
       }
     }
   });

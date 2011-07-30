@@ -3,6 +3,7 @@ DIST=dist
 
 LIB=src/lib/uuid.js
 SRC=src/enhancer.js \
+    src/Range.js \
     src/Element.js \
     src/interfaces/Events.js \
     src/interfaces/Collection.js \
