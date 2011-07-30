@@ -99,6 +99,7 @@ Dual licensed under the MIT and GPL licenses.
   }
 })();
 
+
 /* END EXTERNAL LIB */
 
 
@@ -122,7 +123,7 @@ Dual licensed under the MIT and GPL licenses.
         return !Object.isUndefined(value);
       }
     },
-    
+
     forEach: {
       value: function (obj, func) {
         var key;
@@ -131,31 +132,31 @@ Dual licensed under the MIT and GPL licenses.
         }
       }
     },
-    
+
     map: {
       value: function (obj, func) {
         var key, map = {};
-        
+
         for (key in obj) {
           map[key] = func(obj[key], key);
         }
-        
+
         return map;
       }
     },
-    
+
     some: {
       value: function (obj, func) {
         var key, some = true;
-        
+
         for (key in obj) {
           some = func(obj[key], key);
-          
+
           if (some) {
             return some;
           }
         }
-        
+
         return some;
       }
     },
@@ -312,7 +313,7 @@ Dual licensed under the MIT and GPL licenses.
   Object.defineProperties(Number.prototype, {
     bounds: {
       value: function (min, max) {
-        return (new Range(min, max)).limit(this);
+        return (new Number.Range(min, max)).limit(this);
       }
     }
   });
@@ -385,6 +386,37 @@ Dual licensed under the MIT and GPL licenses.
 (function (exports) {
   "use strict";
 
+  Number.Range = function (min, max) {
+    max = max || (min ? 0 : 100);
+    min = min || 0;
+
+    if (min > max) {
+      [min, max] = [max, min];
+    }
+
+    this.min = min;
+    this.max = max;
+  };
+
+  Number.Range.implements({
+    limit: {
+      value: function (value) {
+        if (value > this.max) {
+          return this.max;
+        } else if (value < this.min) {
+          return this.min;
+        }
+        return value;
+      }
+    }
+  });
+
+}(typeof exports === 'undefined' ? window : exports));
+
+
+(function (exports) {
+  "use strict";
+
   exports.Element = function (tag, options) {
     var element = document.createElement(tag), key;
 
@@ -436,7 +468,7 @@ Dual licensed under the MIT and GPL licenses.
 
   var Events = exports.Events = function () {
     var events = {};
-    
+
     return {
       on: {
         enumerable: true,
@@ -446,7 +478,7 @@ Dual licensed under the MIT and GPL licenses.
           return this;
         }
       },
-      
+
       fire: {
         enumerable: true,
         value: function (event, args) {
@@ -461,7 +493,7 @@ Dual licensed under the MIT and GPL licenses.
           return this;
         }
       },
-      
+
       removeListener: {
         enumerable: true,
         value: function (event, func) {
@@ -482,9 +514,15 @@ Dual licensed under the MIT and GPL licenses.
 (function (exports) {
   "use strict";
 
-  var Collection = exports.Collection = function (Type) {
-    var collection = [];
-    
+  var Collection = exports.Collection = function (Type, interfaces) {
+    var collection = [], key;
+
+    if (typeof interfaces === 'object') {
+      for (key in interfaces) {
+        Type.implements(new exports[key](interfaces[key]));
+      }
+    }
+
     return {
       items: {
         enumerable: true,
@@ -492,7 +530,7 @@ Dual licensed under the MIT and GPL licenses.
           return collection;
         }
       },
-      
+
       create: {
         enumerable: true,
         value: function (options) {
@@ -510,9 +548,19 @@ Dual licensed under the MIT and GPL licenses.
 (function (exports) {
   "use strict";
 
-  var Map = exports.Map = function (Type, id) {
-    var map = {};
+  var Map = exports.Map = function (Type, id, interfaces) {
+    var map = {}, key;
     id = id || 'uuid';
+    if (typeof id === 'object') {
+      interfaces = id;
+      id = 'uuid';
+    }
+
+    if (typeof interfaces === 'object') {
+      for (key in interfaces) {
+        Type.implements(new exports[key](interfaces[key]));
+      }
+    }
 
     return {
       map: {
