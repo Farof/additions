@@ -1,8 +1,14 @@
 (function (exports) {
   "use strict";
 
-  var Collection = exports.Collection = function (Type) {
-    var collection = [];
+  var Collection = exports.Collection = function (Type, interfaces) {
+    var collection = [], key;
+
+    if (typeof interfaces === 'object') {
+      for (key in interfaces) {
+        Type.implements(new exports[key](interfaces[key]));
+      }
+    }
 
     return {
       items: {

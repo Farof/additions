@@ -1,9 +1,19 @@
 (function (exports) {
   "use strict";
 
-  var Map = exports.Map = function (Type, id) {
-    var map = {};
+  var Map = exports.Map = function (Type, id, interfaces) {
+    var map = {}, key;
     id = id || 'uuid';
+    if (typeof id === 'object') {
+      interfaces = id;
+      id = 'uuid';
+    }
+
+    if (typeof interfaces === 'object') {
+      for (key in interfaces) {
+        Type.implements(new exports[key](interfaces[key]));
+      }
+    }
 
     return {
       map: {
