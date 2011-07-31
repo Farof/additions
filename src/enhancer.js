@@ -205,6 +205,14 @@
     }
   });
 
+  Object.defineProperties(Array, {
+    from: {
+      value: function (obj) {
+        return Array.isArray(obj) ? obj : [obj];
+      }
+    }
+  });
+
   Object.defineProperties(Number.prototype, {
     bounds: {
       value: function (min, max) {
