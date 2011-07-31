@@ -399,6 +399,14 @@ Dual licensed under the MIT and GPL licenses.
       }
     }
   });
+  
+  Object.defineProperties(String.prototype, {
+    contains: {
+      value: function (substr) {
+        return this.indexOf(substr) > -1;
+      }
+    }
+  });
 
 }(typeof exports === 'undefined' ? window : exports));
 
