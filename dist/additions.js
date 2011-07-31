@@ -186,6 +186,14 @@ Dual licensed under the MIT and GPL licenses.
       }
     },
 
+    indexOf: {
+      value: function (obj, value) {
+        return Object.match(obj, function (item) {
+          return value === item;
+        });
+      }
+    },
+
     values: {
       value: function (obj) {
         var values = [], key;
@@ -399,7 +407,7 @@ Dual licensed under the MIT and GPL licenses.
       }
     }
   });
-  
+
   Object.defineProperties(String.prototype, {
     contains: {
       value: function (substr) {

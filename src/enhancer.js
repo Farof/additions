@@ -81,6 +81,14 @@
       }
     },
 
+    indexOf: {
+      value: function (obj, value) {
+        return Object.match(obj, function (item) {
+          return value === item;
+        });
+      }
+    },
+
     values: {
       value: function (obj) {
         var values = [], key;
@@ -294,7 +302,7 @@
       }
     }
   });
-  
+
   Object.defineProperties(String.prototype, {
     contains: {
       value: function (substr) {
