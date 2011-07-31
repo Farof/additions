@@ -317,6 +317,34 @@ Dual licensed under the MIT and GPL licenses.
       }
     },
 
+    match: {
+      value: function (func) {
+        var i, ln;
+
+        for (i = 0, ln = this.length; i < ln; i += 1) {
+          if (func(this[i], i, this)) {
+            return this[i];
+          }
+        }
+
+        return;
+      }
+    },
+
+    lastMatch: {
+      value: function (func) {
+        var i, ln, ret;
+
+        for (i = 0, ln = this.length; i < ln; i += 1) {
+          if (func(this[i], i, this)) {
+            ret = this[i];
+          }
+        }
+
+        return ret;
+      }
+    },
+
     include: {
       value: function (item, pass) {
         if (!pass && Array.isArray(item)) {
@@ -587,18 +615,18 @@ Dual licensed under the MIT and GPL licenses.
         }
       },
 
-      create: {
+      add: {
         enumerable: true,
         value: function (options) {
           var item = new Type(options);
           collection.push(item);
-          return this;
+          return item;
         }
       }
     };
   };
 
-}(window));
+}(typeof exports === 'undefined' ? window : exports));
 
 
 (function (exports) {
@@ -634,7 +662,7 @@ Dual licensed under the MIT and GPL licenses.
             item[id] = uuid();
           }
           map[item[id]] = item;
-          return this;
+          return item;
         }
       }
     };

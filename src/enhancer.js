@@ -212,6 +212,34 @@
       }
     },
 
+    match: {
+      value: function (func) {
+        var i, ln;
+
+        for (i = 0, ln = this.length; i < ln; i += 1) {
+          if (func(this[i], i, this)) {
+            return this[i];
+          }
+        }
+
+        return;
+      }
+    },
+
+    lastMatch: {
+      value: function (func) {
+        var i, ln, ret;
+
+        for (i = 0, ln = this.length; i < ln; i += 1) {
+          if (func(this[i], i, this)) {
+            ret = this[i];
+          }
+        }
+
+        return ret;
+      }
+    },
+
     include: {
       value: function (item, pass) {
         if (!pass && Array.isArray(item)) {
