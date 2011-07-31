@@ -81,6 +81,18 @@
       }
     },
 
+    lastMatch: {
+      value: function (obj, func) {
+        var key, ret = null;
+        for (key in obj) {
+          if (func(obj[key], key)) {
+            ret = key;
+          }
+        }
+        return ret;
+      }
+    },
+
     indexOf: {
       value: function (obj, value) {
         return Object.match(obj, function (item) {
