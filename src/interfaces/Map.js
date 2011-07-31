@@ -31,7 +31,7 @@
             item[id] = uuid();
           }
           map[item[id]] = item;
-          return this;
+          return item;
         }
       }
     };

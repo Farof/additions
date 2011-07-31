@@ -18,15 +18,15 @@
         }
       },
 
-      create: {
+      add: {
         enumerable: true,
         value: function (options) {
           var item = new Type(options);
           collection.push(item);
-          return this;
+          return item;
         }
       }
     };
   };
 
-}(window));
+}(typeof exports === 'undefined' ? window : exports));
