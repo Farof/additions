@@ -206,6 +206,14 @@ Dual licensed under the MIT and GPL licenses.
       }
     },
 
+    lastIndexOf: {
+      value: function (obj, value) {
+        return Object.lastMatch(obj, function (item) {
+          return value === item;
+        });
+      }
+    },
+
     values: {
       value: function (obj) {
         var values = [], key;

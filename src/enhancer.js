@@ -101,6 +101,14 @@
       }
     },
 
+    lastIndexOf: {
+      value: function (obj, value) {
+        return Object.lastMatch(obj, function (item) {
+          return value === item;
+        });
+      }
+    },
+
     values: {
       value: function (obj) {
         var values = [], key;
