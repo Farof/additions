@@ -174,6 +174,18 @@ Dual licensed under the MIT and GPL licenses.
       }
     },
 
+    match: {
+      value: function (obj, func) {
+        var key;
+        for (key in obj) {
+          if (func(obj[key], key)) {
+            return key;
+          }
+        }
+        return null;
+      }
+    },
+
     values: {
       value: function (obj) {
         var values = [], key;
