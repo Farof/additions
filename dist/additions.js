@@ -394,7 +394,44 @@ Dual licensed under the MIT and GPL licenses.
     }
   });
 
+  Object.defineProperties(HTMLDocument.prototype, {
+    $: {
+      enumerable: true,
+      value: function () {
+        return this.querySelector.apply(this, arguments);
+      }
+    },
+
+    $$: {
+      enumerable: true,
+      value: function () {
+        return this.querySelectorAll.apply(this, arguments);
+      }
+    },
+
+    $$$: {
+      enumerable: true,
+      value: function () {
+        return this.getElementById.apply(this, arguments);
+      }
+    }
+  });
+
   Object.defineProperties(HTMLElement.prototype, {
+    $: {
+      enumerable: true,
+      value: function () {
+        return this.querySelector.apply(this, arguments);
+      }
+    },
+
+    $$: {
+      enumerable: true,
+      value: function () {
+        return this.querySelectorAll.apply(this, arguments);
+      }
+    },
+
     unload: {
       enumerable: true,
       value: function () {
