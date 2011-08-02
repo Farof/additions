@@ -12,12 +12,7 @@
   Number.Range.implements({
     limit: {
       value: function (value) {
-        if (value > this.max) {
-          return this.max;
-        } else if (value < this.min) {
-          return this.min;
-        }
-        return value;
+        return Math.max(this.min, Math.min(value, this.max));
       }
     }
   });
