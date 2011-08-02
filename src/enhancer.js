@@ -327,6 +327,24 @@
       }
     },
 
+    grab: {
+      enumerable: true,
+      value: function (node) {
+        this.appendChild(node);
+        return this;
+      }
+    },
+
+    adopt: {
+      enumerable: true,
+      value: function () {
+        Array.prototype.forEach.call(arguments, function (node) {
+          this.grab(node);
+        }.bind(this));
+        return this;
+      }
+    },
+
     unload: {
       enumerable: true,
       value: function () {
