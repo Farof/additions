@@ -413,5 +413,14 @@
       }
     }
   });
+  
+  Object.defineProperties(Math, {
+    randomInt: {
+      value: function (min, max) {
+        var r = new Number.Range(min, max);
+        return Math.floor(r.min + Math.random() * (r.max - r.min + 1));
+      }
+    }
+  });
 
 }(typeof exports === 'undefined' ? window : exports));
