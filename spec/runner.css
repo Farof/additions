@@ -1,0 +1,100 @@
+body, div, p, span, ul, ol, li {
+  margin: 0px;
+  padding: 0px;
+}
+
+body {
+  background-color: ivory;
+  font-family: Arial;
+  font-size: 0.8em;
+}
+
+#content {
+  text-align: center;
+}
+
+#sandbox {
+  display: none;
+}
+
+#tests {
+  margin: 30px auto 0;
+  max-width: 900px;
+  text-align: left;
+}
+
+.hidePassed .testsuite.passed:not(:hover) .test.passed {
+  display: none;
+}
+
+.testsuite {
+  
+}
+
+.testsuite > .testsuite {
+  margin-left: 25px;
+}
+
+.testsuite-title {
+  border-bottom: 2px solid #3E3D40;
+  margin: 5px 0px;
+  padding-bottom: 5px;
+}
+
+.test {
+  padding: 2px 5px;
+}
+
+.test ~ .test,
+.testsuite > .testsuite,
+.testsuite ~ .test {
+  margin-top: 3px;
+}
+
+.test.passed {
+  background-color: lime;
+}
+
+.test.failed {
+  background-color: tomato;
+}
+
+.test.failed,
+.test:hover {
+  -moz-border-radius: 2px;
+  -o-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+}
+
+.test-result {
+  
+}
+
+.test-detail {
+  -moz-border-radius: 5px;
+  -o-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  -moz-box-shadow: 0px 0px 2px 0px #3E3D40 inset;
+  -o-box-shadow: 0px 0px 2px 0px #3E3D40 inset;
+  -webkit-box-shadow: 0px 0px 2px 0px #3E3D40 inset;
+  box-shadow: 0px 0px 2px 0px #3E3D40 inset;
+  display: none;
+  font-size: 0.9em;
+  margin: 5px 5px 5px 20px;
+  padding: 5px 8px;
+}
+
+.test.passed > .test-detail {
+  background-color: palegreen;
+}
+
+.test.failed > .test-detail {
+  background-color: lightsalmon;
+}
+
+.test.failed > .test-detail,
+.test:hover > .test-detail {
+  display: block;
+}

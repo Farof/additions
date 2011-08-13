@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Test runner</title>
+    <link rel="stylesheet" href="runner.css" />
+  </head>
+
+  <body>
+    <div id="content">
+      <div id="tests" class="hidePassed">
+        <h1>Tests</h1>
+        <div id="options">
+          <label><input type="checkbox" onclick="runner.toggleShowPassed();">Show passed tests</input></label>
+        </div>
+      </div>
+    </div>
+    
+    <div id="sandbox">
+      <div id="placeholder">
+        <p>some text</p>
+  </body>
+  
+  <!-- source -->
+      </div>
+    </div>
+  <script type="text/javascript" src="../src/enhancer.js"></script>
+  <script type="text/javascript" src="../src/Element.js"></script>
+  
+  <!-- runner -->
+  <script type="text/javascript" src="runner.js"></script>
+  
+  <!-- tests -->
+  <script type="text/javascript" src="test/enhancer.js"></script>
+  <script type="text/javascript" src="test/Element.js"></script>
+</html>

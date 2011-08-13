@@ -106,6 +106,53 @@ Dual licensed under the MIT and GPL licenses.
 (function (exports) {
   "use strict";
 
+  if (typeof Object.defineProperty !== 'function') {
+    Object.defineProperty = function (obj, prop, descriptor) {
+      if (descriptor.value) {
+        obj[prop] = descriptor.value;
+      } else {
+        if (descriptor.get) {
+          obj.__defineGetter__(prop, descriptor.get);
+        }
+        if (descriptor.set) {
+          obj.__defineGetter__(prop, descriptor.set);
+        }
+      }
+    };
+  }
+
+  if (typeof Object.defineProperties !== 'function') {
+    Object.defineProperties = function (obj, properties) {
+      var key;
+      for (key in properties) {
+        Object.defineProperty(obj, key, properties[key]);
+      }
+    };
+  }
+
+  if (typeof Object.keys !== 'function') {
+    Object.keys = function (obj) {
+      var key, keys = [];
+      
+      for (key in obj) {
+        keys.push(key);
+      }
+      
+      return keys;
+    };
+  }
+
+  if (typeof Function.prototype.bind !== 'function') {
+    Object.defineProperty(Function.prototype, 'bind', {
+      value: function (bound) {
+        var self = this;
+        return function () {
+          return self.apply(bound, arguments);
+        }
+      }
+    })
+  }
+
   Object.defineProperties(Object, {
     undefined: {
       value: (function () {}()),
@@ -121,6 +168,31 @@ Dual licensed under the MIT and GPL licenses.
     isDefined: {
       value: function (value) {
         return !Object.isUndefined(value);
+      }
+    },
+
+    same: {
+      value: function (a, b) {
+        var key, i, ln;
+        if (a === null || b === null) {
+          return a === b;
+        }
+
+        if (typeof a === 'object' && typeof b === 'object') {
+          if (Array.isArray(a) && Array.isArray(b)) {
+            return a.length === b.length && a.every(function (value, index) {
+              return Object.same(value, b[index]);
+            });
+          } else {
+            return Array.isArray(a) === Array.isArray(b) &&
+                    Object.keys(a).length === Object.keys(b).length &&
+                    Object.every(a, function (value, key) {
+                      return Object.same(a[key], b[key]);
+                    });
+          }
+        }
+
+        return a === b;
       }
     },
 
@@ -240,7 +312,7 @@ Dual licensed under the MIT and GPL licenses.
       }
     },
 
-    implements: {
+    'implements': {
       value: function (source, I) {
         if (source && I && typeof I === 'object') {
           return Object.every(I, function (value, key) {
@@ -254,14 +326,14 @@ Dual licensed under the MIT and GPL licenses.
   });
 
   Object.defineProperties(Function.prototype, {
-    extends: {
+    'extends': {
       value: function (properties) {
         Object.defineProperties(this, properties);
         return this;
       }
     },
 
-    implements: {
+    'implements': {
       value: function (properties) {
         Object.defineProperties(this.prototype, properties);
         return this;
@@ -307,7 +379,7 @@ Dual licensed under the MIT and GPL licenses.
 
     last: {
       get: function () {
-        return this[this.lenght - 1];
+        return this[this.length - 1];
       }
     },
 
