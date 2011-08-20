@@ -6,15 +6,17 @@
       var passed = a === b;
       return {
         passed: passed,
-        msg: passed ? (a + ' equals ' + b) : ('expected ' + a + ' to equal ' + b)
+        msg: (passed ? (Object.describe(a) + '\nequals\n' + Object.describe(b)) : ('expected\n' + Object.describe(a) + '\nto equal\n' + Object.describe(b))).wrapTag('pre'),
+        isHTML: true
       };
     },
-    
+
     same: function (a, b) {
       var passed = Object.same(a, b);
       return {
         passed: passed,
-        msg: passed ? (a + ' is equivalent to ' + b) : (a + ' should be equivalent to ' + b)
+        msg: (passed ? (Object.describe(a) + '\nis equivalent to\n' + Object.describe(b)) : (Object.describe(a) + '\nshould be equivalent to\n' + Object.describe(b))).wrapTag('pre'),
+        isHTML: true
       };
     },
 
@@ -107,7 +109,7 @@
           err.message
         ));
       }
-      
+
       this.afterSuite();
     },
 
@@ -120,6 +122,10 @@
 
       title.textContent = title.textContent + ' (' + (nb - failed) + '/' + nb + ')'
 
+      if (nb === 0) {
+        last.classList.add('empty');
+      }
+
       if (failed === 0) {
         last.classList.add('passed');
       }
@@ -130,12 +136,13 @@
         this.getTestNode(
           (test.passed ? 'passed' : 'failed'),
           (test.passed ? 'OK' : 'FAIL') + (test.name ? (': ' + test.name) : ''),
-          test.msg
+          test.msg,
+          test.isHTML
         )
       );
     },
-    
-    getTestNode: function (status, statusMsg, detail) {
+
+    getTestNode: function (status, statusMsg, detail, isHTML) {
       return new Element('div', {
         'class': 'test ' + status
       }).adopt(
@@ -147,9 +154,13 @@
         new Element('div', {
           'class': 'test-detail'
         }).grab(
-          new Element('p', {
-            text: detail
-          })
+          isHTML ?
+            new Element('p', {
+              html: detail
+            }) :
+            new Element('p', {
+              text: detail
+            })
         )
       )
     },

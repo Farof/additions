@@ -14,7 +14,7 @@
         }
       },
 
-      fire: {
+      fireEvent: {
         enumerable: true,
         value: function (event, args) {
           var funcs = events[event] || [], i, ln;

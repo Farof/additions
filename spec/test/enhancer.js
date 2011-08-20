@@ -17,12 +17,12 @@
         assert.type(obj.myProp, 'function');
         assert.equal(obj.myProp(), 42);
       });
-      
+
       runner.suite('Object.keys', function (assert) {
         var obj = { a: 4, F: 5, plop: 'yeah' };
         assert.type(Object.keys, 'function');
         assert.same(Object.keys(obj), ['a', 'F', 'plop']);
-      })
+      });
 
       runner.suite('Object.undefined', function (assert) {
         assert.isUndefined(Object.undefined);
@@ -188,10 +188,248 @@
       });
 
       runner.suite('Object.map', function (assert) {
-        var obj = { a: 2, b: 6, c: 3, d: 5 };
+        var obj = { a: 2, b: 6, c: 3, d: 5 }, mapped, lastKey, ref;
+
+        assert.type(Object.map, 'function');
+        mapped = Object.map(obj, function (value, key, objCopy) {
+          ref = objCopy;
+          lastKey = key;
+          return value * 2;
+        });
+        assert.equal(obj, ref);
+        assert.equal(lastKey, 'd');
+        assert.same(mapped, { a: 4, b: 12, c: 6, d: 10 });
+      });
+
+      runner.suite('Object.some', function (assert) {
+        var obj = { a: 3, b: '5' }, has, ref, firstGood;
+
+        assert.type(Object.some, 'function');
+        has = Object.some(obj, function (value, key, copy) {
+          ref = copy;
+          firstGood = key;
+          return typeof value === 'string';
+        });
+        assert.isTrue(has);
+        assert.equal(ref, obj);
+        assert.equal(firstGood, 'b');
+        assert.isFalse(Object.some(obj, function (value) {
+          return value === 42;
+        }));
+      });
+
+      runner.suite('Object.every', function (assert) {
+
+      });
+
+      runner.suite('Object.match', function (assert) {
+
+      });
+
+      runner.suite('Object.lastMatch', function (assert) {
+
+      });
+
+      runner.suite('Object.indexOf', function (assert) {
+
+      });
+
+      runner.suite('Object.lastIndexOf', function (assert) {
+
+      });
+
+      runner.suite('Object.values', function (assert) {
+
+      });
+
+      runner.suite('Object.merge', function (assert) {
+
+      });
+
+      runner.suite('Object.implements', function (assert) {
+
+      });
+
+      runner.suite('Object.describe', function (assert) {
+        assert.equal(Object.describe(Object.undefined), 'undefined');
+        assert.equal(Object.describe(null), 'null');
+        assert.equal(Object.describe(1), '1');
+        assert.equal(Object.describe('42'), '42');
+        assert.equal(Object.describe(function () { return 42; }), (function () { return 42; }).toString());
+        assert.equal(Object.describe([4, 2]), '[\n\t4,\n\t2\n]');
+        assert.equal(Object.describe({ x: 3, y: 5 }), '{\n\tx: 3,\n\ty: 5\n}');
+        
+        assert.equal(Object.describe([4, { d: 4, c: 2 }, 5]), '[\n\t4,\n\t{\n\t\td: 4,\n\t\tc: 2\n\t},\n\t5\n]');
+        assert.equal(Object.describe({ e: 3, b: [4, 2], f: 5 }), '{\n\te: 3,\n\tb: [\n\t\t4,\n\t\t2\n\t],\n\tf: 5\n}');
+      });
+      
+      runner.suite('Object.properties', function (assert) {
+        assert.type(Object.properties, 'function');
+        
+        assert.same(Object.properties({}), {});
+        assert.same(Object.properties({ x: 3, f: 4 }), { x: 3, f: 4 });
+        assert.same(Object.properties({ x: 3, f: 4, g: function () {} }), { x: 3, f: 4 });
+      })
+    });
+
+    runner.suite('Function', function (assert) {
+      runner.suite('Function.prototype', function (assert) {
+        runner.suite('Function.prototype.extends', function (assert) {
+
+        });
+
+        runner.suite('Function.prototype.implements', function (assert) {
+
+        });
+
+        runner.suite('Function.prototype.delay', function (assert) {
+
+        });
+
+        runner.suite('Function.prototype.unshift', function (assert) {
+
+        });
       });
     });
 
+    runner.suite('Event', function (assert) {
+      runner.suite('Event.prototype', function (assert) {
+        runner.suite('Event.prototype.stop', function (assert) {
+
+        });
+      });
+    });
+
+    runner.suite('Array', function (assert) {
+      runner.suite('Array.from', function (assert) {
+
+      });
+
+       runner.suite('Array.prototype', function (assert) {
+          runner.suite('Array.prototype.first', function (assert) {
+
+          });
+
+          runner.suite('Array.prototype.last', function (assert) {
+
+          });
+
+          runner.suite('Array.prototype.contains', function (assert) {
+
+          });
+
+          runner.suite('Array.prototype.match', function (assert) {
+
+          });
+
+          runner.suite('Array.prototype.lastMatch', function (assert) {
+
+          });
+
+          runner.suite('Array.prototype.include', function (assert) {
+
+          });
+
+          runner.suite('Array.prototype.merge', function (assert) {
+
+          });
+
+          runner.suite('Array.prototype.remove', function (assert) {
+
+          });
+        });
+    });
+
+    runner.suite('Number', function (assert) {
+      runner.suite('Number.prototype', function (assert) {
+        runner.suite('Number.prototype.bounds', function (assert) {
+
+        });
+      });
+    });
+
+    runner.suite('HTMLDocument', function (assert) {
+      runner.suite('HTMLDocument.prototype', function (assert) {
+        runner.suite('HTMLDocument.prototype.$', function (assert) {
+
+        });
+
+        runner.suite('HTMLDocument.prototype.$$', function (assert) {
+
+        });
+
+        runner.suite('HTMLDocument.prototype.$$$', function (assert) {
+
+        });
+      });
+    });
+
+    runner.suite('HTMLElement', function (assert) {
+      runner.suite('HTMLElement.prototype', function (assert) {
+        runner.suite('HTMLElement.prototype.$', function (assert) {
+
+        });
+
+        runner.suite('HTMLElement.prototype.$$', function (assert) {
+
+        });
+
+        runner.suite('HTMLElement.prototype.grab', function (assert) {
+
+        });
+
+        runner.suite('HTMLElement.prototype.adopt', function (assert) {
+
+        });
+
+        runner.suite('HTMLElement.prototype.unlaod', function (assert) {
+
+        });
+
+        runner.suite('HTMLElement.prototype.empty', function (assert) {
+
+        });
+
+        runner.suite('HTMLElement.prototype.replaces', function (assert) {
+
+        });
+
+        runner.suite('HTMLElement.prototype.getPosition', function (assert) {
+
+        });
+      });
+    });
+
+    runner.suite('String', function (assert) {
+      runner.suite('String.prototype', function (assert) {
+        runner.suite('String.prototype.contains', function (assert) {
+        assert.isTrue('yeahhehe'.contains(''));
+          assert.isTrue('proufyeahglop'.contains('eahg'));
+          assert.isFalse('glopgneh'.contains('grouf'));
+        });
+        
+        runner.suite('String.prototype.repeat', function (assert) {
+          assert.type('glop'.repeat, 'function');
+          assert.equal('glop'.repeat(0), '');
+          assert.equal('glop'.repeat(-1), '');
+          assert.equal('glop'.repeat(1), 'glop');
+          assert.equal('glop'.repeat(3), 'glopglopglop');
+          assert.equal('glop'.repeat(3, '#'), 'glop#glop#glop');
+        });
+      });
+      
+      runner.suite('String.prototype.wrapTag', function (assert) {
+        assert.type('glop'.wrapTag, 'function');
+        assert.equal('glop'.wrapTag('div'), '<div>glop</div>');
+        assert.equal('glop'.wrapTag('pre', 1), '<pre>\n\tglop\n</pre>');
+      });
+    });
+
+    runner.suite('Math', function (assert) {
+      runner.suite('Math.randomInt', function (assert) {
+
+      });
+    });
   });
 
 }(typeof exports === 'undefined' ? window : exports));

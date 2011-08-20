@@ -41,6 +41,10 @@
     text: function (text) {
       var textNode = document.createTextNode(text);
       this.appendChild(textNode);
+    },
+    
+    html: function (text) {
+      this.innerHTML = text;
     }
   };
 

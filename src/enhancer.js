@@ -1,6 +1,7 @@
 (function (exports) {
   "use strict";
 
+  /* unsuported capabilities fix */
   if (typeof Object.defineProperty !== 'function') {
     Object.defineProperty = function (obj, prop, descriptor) {
       if (descriptor.value) {
@@ -28,11 +29,11 @@
   if (typeof Object.keys !== 'function') {
     Object.keys = function (obj) {
       var key, keys = [];
-      
+
       for (key in obj) {
         keys.push(key);
       }
-      
+
       return keys;
     };
   }
@@ -48,6 +49,8 @@
     })
   }
 
+
+  /* Object */
   Object.defineProperties(Object, {
     undefined: {
       value: (function () {}()),
@@ -105,7 +108,7 @@
         var key, map = {};
 
         for (key in obj) {
-          map[key] = func(obj[key], key);
+          map[key] = func(obj[key], key, obj);
         }
 
         return map;
@@ -117,7 +120,7 @@
         var key, some = true;
 
         for (key in obj) {
-          some = func(obj[key], key);
+          some = func(obj[key], key, obj);
 
           if (some) {
             return some;
@@ -217,9 +220,59 @@
 
         return false;
       }
+    },
+
+    describe: {
+      value: function (obj, depth) {
+        var key, i, ln, ret, cr;
+        if (typeof obj === 'object') {
+          if (obj === null) {
+            return 'null';
+          } else if (Array.isArray(obj)) {
+            depth = depth || 1;
+            cr = '\n' + '\t'.repeat(depth);
+            ret = '[' + cr;
+
+            for (i = 0, ln = obj.length; i < ln; i += 1) {
+              ret += Object.describe(obj[i], depth + 1) + ',' + cr;
+            }
+
+            ret = ret.substring(0, ret.length - cr.length - 1) + '\n' + '\t'.repeat(depth - 1) + ']';
+            return ret;
+          } else {
+            depth = depth || 1;
+            cr = '\n' + '\t'.repeat(depth);
+            ret = '{' + cr;
+            for (key in obj) {
+              ret += key + ': ' + Object.describe(obj[key], depth + 1) + ',' + cr;
+            }
+            // remove last comma and CR, and close object description
+            ret = ret.substring(0, ret.length - cr.length - 1) + '\n' + '\t'.repeat(depth - 1) + '}';
+            return ret;
+          }
+        }
+
+        return typeof obj === 'undefined' ? 'undefined' : obj.toString();
+      }
+    },
+
+    properties: {
+      value: function (obj) {
+        var copy = {}, key;
+        
+        for (key in obj) {
+          if (typeof obj[key] !== 'function') {
+            copy[key] = obj[key];
+          }
+        }
+        
+        return copy;
+      }
     }
   });
 
+
+  /* Function.prototype */
   Object.defineProperties(Function.prototype, {
     'extends': {
       value: function (properties) {
@@ -265,6 +318,17 @@
     }
   });
 
+
+  /* Array */
+  Object.defineProperties(Array, {
+    from: {
+      value: function (obj) {
+        return Array.isArray(obj) ? obj : [obj];
+      }
+    }
+  });
+
+  /* Array.prototype */
   Object.defineProperties(Array.prototype, {
     first: {
       get: function () {
@@ -345,14 +409,8 @@
     }
   });
 
-  Object.defineProperties(Array, {
-    from: {
-      value: function (obj) {
-        return Array.isArray(obj) ? obj : [obj];
-      }
-    }
-  });
 
+  /* Number.prototype */
   Object.defineProperties(Number.prototype, {
     bounds: {
       value: function (min, max) {
@@ -361,42 +419,35 @@
     }
   });
 
+
+  /* HTMLDocument.prototype */
   Object.defineProperties(HTMLDocument.prototype, {
     $: {
       enumerable: true,
-      value: function () {
-        return this.querySelector.apply(this, arguments);
-      }
+      value: HTMLDocument.prototype.querySelector
     },
 
     $$: {
       enumerable: true,
-      value: function () {
-        return this.querySelectorAll.apply(this, arguments);
-      }
+      value: HTMLDocument.prototype.querySelectorAll
     },
 
     $$$: {
       enumerable: true,
-      value: function () {
-        return this.getElementById.apply(this, arguments);
-      }
+      value: HTMLDocument.prototype.getElementById
     }
   });
 
+  /* HTMLElement.prototype */
   Object.defineProperties(HTMLElement.prototype, {
     $: {
       enumerable: true,
-      value: function () {
-        return this.querySelector.apply(this, arguments);
-      }
+      value: HTMLElement.prototype.querySelector
     },
 
     $$: {
       enumerable: true,
-      value: function () {
-        return this.querySelectorAll.apply(this, arguments);
-      }
+      value: HTMLElement.prototype.querySelectorAll
     },
 
     grab: {
@@ -448,7 +499,7 @@
       }
     },
 
-    pos: {
+    getPosition: {
       enumerable: true,
       value: function (topParent) {
         var
@@ -478,14 +529,38 @@
     }
   });
 
+
+  /* String.prototype */
   Object.defineProperties(String.prototype, {
     contains: {
       value: function (substr) {
         return this.indexOf(substr) > -1;
       }
+    },
+
+    repeat: {
+      value: function (times, separator) {
+        var i, ln, ret = '';
+        times = typeof times === 'number' ? Math.max(0, times) : 1;
+        separator = separator || '';
+
+        for (i = 0, ln = times; i < ln; i += 1) {
+          ret += this + separator;
+        }
+
+        return ret.substring(0, ret.length - separator.length);
+      }
+    },
+
+    wrapTag: {
+      value: function (tag, indent) {
+        return '<' + tag + '>' + (indent ? ('\n' + '\t'.repeat(indent)) : '') + this + (indent ? '\n' : '') + '</' + tag + '>';
+      }
     }
   });
 
+
+  /* Math */
   Object.defineProperties(Math, {
     randomInt: {
       value: function (min, max) {

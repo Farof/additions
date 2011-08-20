@@ -31,6 +31,10 @@ body {
   
 }
 
+.testsuite.empty > .testsuite-title {
+  background-color: orange;
+}
+
 .testsuite > .testsuite {
   margin-left: 25px;
 }
