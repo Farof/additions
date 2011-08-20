@@ -469,6 +469,13 @@ Dual licensed under the MIT and GPL licenses.
       }
     },
 
+    extend: {
+      value: function (obj, I) {
+        Object.defineProperties(obj, I);
+        return obj;
+      }
+    },
+
     describe: {
       value: function (obj, depth) {
         var key, i, ln, ret, cr;
@@ -570,7 +577,14 @@ Dual licensed under the MIT and GPL licenses.
   Object.defineProperties(Array, {
     from: {
       value: function (obj) {
-        return Array.isArray(obj) ? obj : [obj];
+        return Array.isArray(obj) ?
+                obj :
+                (obj === Object.undefined ? 
+                  [] : 
+                  ((typeof obj === 'object' && typeof obj.length === 'number') ?
+                    Array.prototype.slice.call(obj) : 
+                    [obj])
+                );
       }
     }
   });
@@ -860,7 +874,7 @@ Dual licensed under the MIT and GPL licenses.
     this.red = r || Math.randomInt(255);
     this.green = g || Math.randomInt(255);
     this.blue = b || Math.randomInt(255);
-    this.alpha = typeof a === 'number' ? new Range(1).limit(a) : 1;
+    this.alpha = typeof a === 'number' ? new Number.Range(1).limit(a) : 1;
   };
 
   Color.extends({
@@ -992,9 +1006,13 @@ Dual licensed under the MIT and GPL licenses.
     return {
       on: {
         enumerable: true,
-        value: function (event, func) {
+        value: function (event, func, once) {
+          var self = this;
           events[event] = events[event] || [];
-          events[event].include(func);
+          events[event].include(once ? function onceWrapper() {
+            func.apply(this, arguments);
+            return once;
+          } : func);
           return this;
         }
       },
@@ -1002,13 +1020,20 @@ Dual licensed under the MIT and GPL licenses.
       fireEvent: {
         enumerable: true,
         value: function (event, args) {
-          var funcs = events[event] || [], i, ln;
+          var funcs = events[event] || [], i, ln, once, toRemove = [];
           for (i = 0, ln = funcs.length; i < ln; i += 1) {
             try {
-              funcs[i].apply(this, args || []);
+              once = funcs[i].apply(this, arguments.length > 2 ? Array.prototype.slice.call(arguments, 1) : Array.from(args));
+              if (once) {
+                toRemove.include(funcs[i]);
+              }
             } catch (e) {
-              console.log('error calling function mapped to event "' + event + '": ', e, funcs[i]);
+              console.log('error calling function mapped to event "' + event + '": ', e, e.message, funcs[i]);
             }
+          }
+          
+          while (toRemove.length > 0) {
+            this.removeListener(event, toRemove.shift());
           }
           return this;
         }

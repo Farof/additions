@@ -5,7 +5,7 @@
     this.red = r || Math.randomInt(255);
     this.green = g || Math.randomInt(255);
     this.blue = b || Math.randomInt(255);
-    this.alpha = typeof a === 'number' ? new Range(1).limit(a) : 1;
+    this.alpha = typeof a === 'number' ? new Number.Range(1).limit(a) : 1;
   };
 
   Color.extends({

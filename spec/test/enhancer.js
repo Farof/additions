@@ -313,6 +313,27 @@
         assert.isFalse(Object.implements(obj, { g: 3, t: function () { return 41; } }));
       });
 
+      runner.suite('Object.extend', function (assert) {
+        var obj = {}, f = function () {}, add = {
+          e: {
+            value: 'glop'
+          },
+          f: {
+            value: f
+          }
+        };
+        
+        assert.type(Object.extend, 'function');
+        
+        assert.isUndefined(obj.e);
+        assert.isUndefined(obj.f);
+        
+        Object.extend(obj, add);
+        
+        assert.equal(obj.e, 'glop');
+        assert.equal(obj.f, f);
+      });
+
       runner.suite('Object.describe', function (assert) {
         assert.equal(Object.describe(Object.undefined), 'undefined');
         assert.equal(Object.describe(null), 'null');
@@ -366,7 +387,31 @@
         });
 
         runner.suite('Function.prototype.implements', function (assert) {
-          
+          var base = function () {}, I = {
+            a: {
+              value: 1
+            },
+            b: {
+              value: 2
+            },
+            c: {
+              get: function () {
+                return 42;
+              }
+            }
+          };
+
+          assert.type(base.implements, 'function');
+
+          assert.isUndefined(new base().a);
+          assert.isUndefined(new base().b);
+          assert.isUndefined(new base().c);
+
+          base.implements(I);
+
+          assert.equal(new base().a, 1);
+          assert.equal(new base().b, 2);
+          assert.equal(new base().c, 42);
         });
 
         runner.suite('Function.prototype.delay', function (assert) {
@@ -374,7 +419,36 @@
         });
 
         runner.suite('Function.prototype.unshift', function (assert) {
+          var i = 0, u = 0, f = function () {
+            i += 1;
+            assert.equal(arguments.length, u + 1);
 
+            if (arguments.length === 1) {
+              assert.equal(arguments[0], 45);
+            } else if (arguments.length === 2) {
+              assert.equal(arguments[0], 35);
+              assert.equal(arguments[1], 98);
+            } else if (arguments.length === 3) {
+              assert.equal(arguments[0], 35);
+              assert.equal(arguments[1], 76);
+              assert.equal(arguments[2], 37);
+            }
+
+            return 42;
+          }, unshifted;
+
+          assert.type(f.unshift, 'function');
+
+          assert.equal(f(45), 42);
+
+          unshifted = f.unshift(35);
+          assert.equal(f(45), 42);
+          u += 1;
+          assert.equal(unshifted(98), 42);
+
+          unshifted = unshifted.unshift(76);
+          u += 1;
+          assert.equal(unshifted(37), 42);
         });
       });
     });
@@ -389,7 +463,14 @@
 
     runner.suite('Array', function (assert) {
       runner.suite('Array.from', function (assert) {
-
+        assert.type(Array.from, 'function');
+        
+        assert.same(Array.from(), []);
+        assert.same(Array.from([3, 4, 5]), [3, 4, 5]);
+        assert.same(Array.from({ a: 1, b: 2, c: 3}), [{ a: 1, b: 2, c: 3}]);
+        assert.same(Array.from(34), [34]);
+        assert.same(Array.from('glop'), ['glop']);
+        (function () { assert.same(Array.from(arguments), [42]); }(42));
       });
 
        runner.suite('Array.prototype', function (assert) {

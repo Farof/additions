@@ -364,6 +364,13 @@
       }
     },
 
+    extend: {
+      value: function (obj, I) {
+        Object.defineProperties(obj, I);
+        return obj;
+      }
+    },
+
     describe: {
       value: function (obj, depth) {
         var key, i, ln, ret, cr;
@@ -465,7 +472,14 @@
   Object.defineProperties(Array, {
     from: {
       value: function (obj) {
-        return Array.isArray(obj) ? obj : [obj];
+        return Array.isArray(obj) ?
+                obj :
+                (obj === Object.undefined ? 
+                  [] : 
+                  ((typeof obj === 'object' && typeof obj.length === 'number') ?
+                    Array.prototype.slice.call(obj) : 
+                    [obj])
+                );
       }
     }
   });

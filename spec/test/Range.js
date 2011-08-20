@@ -18,7 +18,11 @@
     
     runner.suite('Number.Range.prototype', function (assert) {
       runner.suite('Number.Range.prototype.limit', function (assert) {
-
+        var r = new Number.Range(34, 42);
+        
+        assert.equal(r.limit(12), 34);
+        assert.equal(r.limit(57), 42);
+        assert.equal(r.limit(40), 40);
       });
     });
   });

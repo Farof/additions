@@ -46,6 +46,7 @@ body {
 }
 
 .test {
+  margin-left: 15px;
   padding: 2px 5px;
 }
 
@@ -87,6 +88,7 @@ body {
   display: none;
   font-size: 0.95em;
   margin: 5px 5px 5px 20px;
+  overflow: auto;
   padding: 5px 8px;
 }
 

@@ -29,7 +29,7 @@
       };
     },
     
-    implements: function (a, b) {
+    'implements': function (a, b) {
       var passed = Object.implements(a, b);
       return {
         passed: passed,
@@ -81,6 +81,14 @@
         msg: (passed ? (Object.describe(value).wrapTag('pre') + '\nis false') : (Object.describe(value).wrapTag('pre') + '\nshould be false')),
         isHTML: true
       };
+    },
+    
+    between: function (value, min, max) {
+      var passed = value >= min && value <= max;
+      return {
+        passed: passed,
+        msg: passed ? (value + ' is between ' + min + ' and ' + max) : (value + ' should be between ' + min + ' and ' + max)
+      }
     }
   };
 
