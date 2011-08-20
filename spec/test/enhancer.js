@@ -219,35 +219,98 @@
       });
 
       runner.suite('Object.every', function (assert) {
+        var obj = { a: 4, b: 13 }, ref, lastKey;
 
+        assert.type(Object.every, 'function');
+
+        assert.isTrue(Object.every(obj, function (value, key, copy) {
+          ref = copy;
+          lastKey = key;
+          return typeof value === 'number';
+        }));
+        assert.equal(obj, ref);
+        assert.equal(lastKey, 'b');
+
+        assert.isFalse(Object.every(obj, function (value) {
+          return value < 10;
+        }));
       });
 
       runner.suite('Object.match', function (assert) {
+        var obj = { a: 42, b: 'glop', c: 42, e: 'yeah', d: function () {} }, ref, matchValue;
 
+        assert.type(Object.match, 'function');
+
+        assert.equal(Object.match(obj, function (value, key, copy) {
+          ref = copy;
+          matchValue = value;
+          return typeof value === 'string';
+        }), 'b');
+        assert.equal(ref, obj);
+        assert.equal(matchValue, 'glop');
+
+        assert.isUndefined(Object.match(obj, function (value) {
+          return !value;
+        }));
       });
 
       runner.suite('Object.lastMatch', function (assert) {
+        var f = function () {}, obj = { a: 42, b: 'glop', c: 42, e: 'yeah', d: f }, ref, lastValue;
 
+        assert.type(Object.lastMatch, 'function');
+
+        assert.equal(Object.lastMatch(obj, function (value, key, copy) {
+          ref = copy;
+          lastValue = value;
+          return typeof value === 'string';
+        }), 'e');
+        assert.equal(ref, obj);
+        assert.equal(lastValue, f);
+
+        assert.isUndefined(Object.lastMatch(obj, function (value) {
+          return !value;
+        }));
       });
 
-      runner.suite('Object.indexOf', function (assert) {
+      runner.suite('Object.keyOf', function (assert) {
+        var obj = { a: 3, g: 6, d: 7, t: 6 };
 
+        assert.type(Object.keyOf, 'function');
+
+        assert.equal(Object.keyOf(obj, 6), 'g');
+        assert.isUndefined(Object.keyOf(obj, 9));
       });
 
-      runner.suite('Object.lastIndexOf', function (assert) {
+      runner.suite('Object.lastKeyOf', function (assert) {
+        var obj = { a: 3, g: 6, d: 7, t: 6 };
 
+        assert.type(Object.lastKeyOf, 'function');
+
+        assert.equal(Object.lastKeyOf(obj, 6), 't');
+        assert.isUndefined(Object.lastKeyOf(obj, 9));
       });
 
       runner.suite('Object.values', function (assert) {
-
+        var f = function () {
+          return 42;
+        };
+        assert.type(Object.values, 'function');
+        assert.same(Object.values({ f: f, r: 4, g: 'glop' }), [f, 4, 'glop']);
       });
 
       runner.suite('Object.merge', function (assert) {
-
+        assert.type(Object.merge, 'function');
+        assert.same(Object.merge({ a: 1, b: 2, c: 3 }, { b: 'glop', d: 5 }), { a: 1, b: 'glop', c: 3, d: 5 });
       });
 
       runner.suite('Object.implements', function (assert) {
+        var f = function () { return 42; }, obj = { a: 4, g: 3, f: 'glop', t: f };
+        assert.type(Object.implements, 'function');
 
+        assert.isTrue(Object.implements(obj, { g: 3, t: f }));
+        assert.isFalse(Object.implements(obj, { g: 3, t: f, y: 4 }));
+        assert.isFalse(Object.implements(obj, { g: 5, t: f }));
+        assert.isFalse(Object.implements(obj, { g: 3, t: function () { return 41; } }));
       });
 
       runner.suite('Object.describe', function (assert) {
@@ -258,14 +321,14 @@
         assert.equal(Object.describe(function () { return 42; }), (function () { return 42; }).toString());
         assert.equal(Object.describe([4, 2]), '[\n\t4,\n\t2\n]');
         assert.equal(Object.describe({ x: 3, y: 5 }), '{\n\tx: 3,\n\ty: 5\n}');
-        
+
         assert.equal(Object.describe([4, { d: 4, c: 2 }, 5]), '[\n\t4,\n\t{\n\t\td: 4,\n\t\tc: 2\n\t},\n\t5\n]');
         assert.equal(Object.describe({ e: 3, b: [4, 2], f: 5 }), '{\n\te: 3,\n\tb: [\n\t\t4,\n\t\t2\n\t],\n\tf: 5\n}');
       });
-      
+
       runner.suite('Object.properties', function (assert) {
         assert.type(Object.properties, 'function');
-        
+
         assert.same(Object.properties({}), {});
         assert.same(Object.properties({ x: 3, f: 4 }), { x: 3, f: 4 });
         assert.same(Object.properties({ x: 3, f: 4, g: function () {} }), { x: 3, f: 4 });
@@ -275,11 +338,35 @@
     runner.suite('Function', function (assert) {
       runner.suite('Function.prototype', function (assert) {
         runner.suite('Function.prototype.extends', function (assert) {
+          var base = function () {}, I = {
+            a: {
+              value: 1
+            },
+            b: {
+              value: 2
+            },
+            c: {
+              get: function () {
+                return 42;
+              }
+            }
+          };
 
+          assert.type(base.extends, 'function');
+
+          assert.isUndefined(base.a);
+          assert.isUndefined(base.b);
+          assert.isUndefined(base.c);
+
+          base.extends(I);
+
+          assert.equal(base.a, 1);
+          assert.equal(base.b, 2);
+          assert.equal(base.c, 42);
         });
 
         runner.suite('Function.prototype.implements', function (assert) {
-
+          
         });
 
         runner.suite('Function.prototype.delay', function (assert) {
@@ -407,7 +494,7 @@
           assert.isTrue('proufyeahglop'.contains('eahg'));
           assert.isFalse('glopgneh'.contains('grouf'));
         });
-        
+
         runner.suite('String.prototype.repeat', function (assert) {
           assert.type('glop'.repeat, 'function');
           assert.equal('glop'.repeat(0), '');
@@ -417,7 +504,7 @@
           assert.equal('glop'.repeat(3, '#'), 'glop#glop#glop');
         });
       });
-      
+
       runner.suite('String.prototype.wrapTag', function (assert) {
         assert.type('glop'.wrapTag, 'function');
         assert.equal('glop'.wrapTag('div'), '<div>glop</div>');

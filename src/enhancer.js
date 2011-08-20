@@ -277,7 +277,7 @@
       value: function (obj, func) {
         var key;
         for (key in obj) {
-          if (!func(obj[key], key)) {
+          if (!func(obj[key], key, obj)) {
             return false;
           }
         }
@@ -290,7 +290,7 @@
       value: function (obj, func) {
         var key;
         for (key in obj) {
-          if (func(obj[key], key)) {
+          if (func(obj[key], key, obj)) {
             return key;
           }
         }
@@ -302,7 +302,7 @@
       value: function (obj, func) {
         var key, ret = null;
         for (key in obj) {
-          if (func(obj[key], key)) {
+          if (func(obj[key], key, obj)) {
             ret = key;
           }
         }
@@ -310,7 +310,7 @@
       }
     },
 
-    indexOf: {
+    keyOf: {
       value: function (obj, value) {
         return Object.match(obj, function (item) {
           return value === item;
@@ -318,7 +318,7 @@
       }
     },
 
-    lastIndexOf: {
+    lastKeyOf: {
       value: function (obj, value) {
         return Object.lastMatch(obj, function (item) {
           return value === item;
@@ -356,7 +356,7 @@
       value: function (source, I) {
         if (source && I && typeof I === 'object') {
           return Object.every(I, function (value, key) {
-            return Object.isDefined(source[key]);
+            return Object.isDefined(source[key]) && Object.same(source[key], value);
           });
         }
 
@@ -566,17 +566,23 @@
   Object.defineProperties(HTMLDocument.prototype, {
     $: {
       enumerable: true,
-      value: HTMLDocument.prototype.querySelector
+      value: function () {
+        return this.querySelector.apply(this, arguments);
+      }
     },
 
     $$: {
       enumerable: true,
-      value: HTMLDocument.prototype.querySelectorAll
+      value: function () {
+        return this.querySelectorAll.apply(this, arguments);
+      }
     },
 
     $$$: {
       enumerable: true,
-      value: HTMLDocument.prototype.getElementById
+      value: function () {
+        return this.getElementById.apply(this, arguments);
+      }
     }
   });
 
@@ -584,12 +590,16 @@
   Object.defineProperties(HTMLElement.prototype, {
     $: {
       enumerable: true,
-      value: HTMLElement.prototype.querySelector
+      value: function () {
+        return this.querySelector.apply(this, arguments);
+      }
     },
 
     $$: {
       enumerable: true,
-      value: HTMLElement.prototype.querySelectorAll
+      value: function () {
+        return this.querySelectorAll.apply(this, arguments);
+      }
     },
 
     grab: {
