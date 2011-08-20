@@ -10,18 +10,13 @@ SRC=src/enhancer.js \
     src/interfaces/Collection.js \
     src/interfaces/Map.js
 OUT=${DIST}/additions.js
-OUTMIN=${DIST}/additions.min.js
 
 
-all: additions mini
+all: additions
 	@echo "make: OK"
 
 additions: ${OUT}
 	@echo "additions.js: OK"
-
-mini: ${OUT}
-	@uglifyjs --max-line-len 120 ${OUT} > ${OUTMIN}
-	@echo "additions.min.js: OK"
 
 ${OUT}: ${SRC} ${LIB}
 	@echo "/*" > $@
