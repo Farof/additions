@@ -23,13 +23,9 @@
         value: function (event, args) {
           var funcs = events[event] || [], i, ln, once, toRemove = [];
           for (i = 0, ln = funcs.length; i < ln; i += 1) {
-            try {
-              once = funcs[i].apply(this, arguments.length > 2 ? Array.prototype.slice.call(arguments, 1) : Array.from(args));
-              if (once) {
-                toRemove.include(funcs[i]);
-              }
-            } catch (e) {
-              console.log('error calling function mapped to event "' + event + '": ', e, e.message, funcs[i]);
+           once = funcs[i].apply(this, arguments.length > 2 ? Array.prototype.slice.call(arguments, 1) : Array.from(args));
+            if (once) {
+              toRemove.include(funcs[i]);
             }
           }
           

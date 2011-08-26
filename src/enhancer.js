@@ -11,7 +11,7 @@
           obj.__defineGetter__(prop, descriptor.get);
         }
         if (descriptor.set) {
-          obj.__defineGetter__(prop, descriptor.set);
+          obj.__defineSetter__(prop, descriptor.set);
         }
       }
     };
