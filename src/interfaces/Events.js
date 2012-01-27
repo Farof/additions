@@ -5,44 +5,58 @@
     var events = {};
 
     return {
-      on: {
+      addListener: {
         enumerable: true,
-        value: function (event, func, once) {
-          var self = this;
-          events[event] = events[event] || [];
-          events[event].include(once ? function onceWrapper() {
-            func.apply(this, arguments);
-            return once;
-          } : func);
+        value: function (name, func, once) {
+          var self = this, wrapper;
+
+          if (!events[name]) {
+            events[name] = [];
+          }
+
+          if (typeof func === 'function') {
+            if (once) {
+              wrapper = function () {
+                this.removeListener(name, wrapper);
+                return func.apply(this, arguments);
+              }.bind(this)
+              events[name].include(wrapper);
+            } else {
+              events[name].include(func);
+            }
+          }
+
           return this;
         }
       },
 
       fireEvent: {
         enumerable: true,
-        value: function (event, args) {
-          var funcs = events[event] || [], i, ln, once, toRemove = [];
-          for (i = 0, ln = funcs.length; i < ln; i += 1) {
-           once = funcs[i].apply(this, arguments.length > 2 ? Array.prototype.slice.call(arguments, 1) : Array.from(args));
-            if (once) {
-              toRemove.include(funcs[i]);
+        value: function (name, args) {
+          var list = events[name].clone(), i, ln;
+
+          if (list) {
+            args = Array.from(arguments).slice(1);
+            for (i = 0, ln = list.length; i < ln; i += 1) {
+              list[i].apply(this, args);
             }
           }
-          
-          while (toRemove.length > 0) {
-            this.removeListener(event, toRemove.shift());
-          }
+
           return this;
         }
       },
 
       removeListener: {
         enumerable: true,
-        value: function (event, func) {
-          if (func) {
-            events[event].remove(func);
-          } else {
-            events[event] = [];
+        value: function (name, func) {
+          var list = events[name];
+
+          if (Array.isArray(list)) {
+            if (typeof func === 'function') {
+              list.remove(func);
+            } else {
+              events[name] = [];
+            }
           }
           return this;
         }

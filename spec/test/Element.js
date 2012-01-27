@@ -22,6 +22,14 @@
       runner.suite('Element.Mutators.html', function (assert) {
 
       });
+
+      runner.suite('Element.Mutators.Absolute', function (assert) {
+
+      });
+
+      runner.suite('Element.Mutators.Dragable', function (assert) {
+
+      });
     });
   });
 

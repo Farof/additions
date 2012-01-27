@@ -473,39 +473,57 @@
         (function () { assert.same(Array.from(arguments), [42]); }(42));
       });
 
-       runner.suite('Array.prototype', function (assert) {
-          runner.suite('Array.prototype.first', function (assert) {
-
-          });
-
-          runner.suite('Array.prototype.last', function (assert) {
-
-          });
-
-          runner.suite('Array.prototype.contains', function (assert) {
-
-          });
-
-          runner.suite('Array.prototype.match', function (assert) {
-
-          });
-
-          runner.suite('Array.prototype.lastMatch', function (assert) {
-
-          });
-
-          runner.suite('Array.prototype.include', function (assert) {
-
-          });
-
-          runner.suite('Array.prototype.merge', function (assert) {
-
-          });
-
-          runner.suite('Array.prototype.remove', function (assert) {
-
-          });
+      runner.suite('Array.prototype', function (assert) {
+        runner.suite('Array.prototype.clone', function (assert) {
+          var ar = [34, 32, 67, 98], clone = ar.clone();
+          assert.same(ar, clone);
+          assert.isFalse(ar === clone);
         });
+
+        runner.suite('Array.prototype.first', function (assert) {
+
+        });
+
+        runner.suite('Array.prototype.last', function (assert) {
+
+        });
+
+        runner.suite('Array.prototype.contains', function (assert) {
+
+        });
+
+        runner.suite('Array.prototype.match', function (assert) {
+
+        });
+
+        runner.suite('Array.prototype.lastMatch', function (assert) {
+
+        });
+
+        runner.suite('Array.prototype.include', function (assert) {
+
+        });
+
+        runner.suite('Array.prototype.merge', function (assert) {
+
+        });
+
+        runner.suite('Array.prototype.remove', function (assert) {
+          var f = function () {}, ar = [23, 54, 67, f, 'aze', 0];
+          ar.remove(54);
+          assert.same(ar, [23, 67, f, 'aze', 0]);
+          ar.remove(f);
+          assert.same(ar, [23, 67, 'aze', 0]);
+        });
+
+        runner.suite('Array.prototype.every', function (assert) {
+
+        });
+        
+        runner.suite('Array.prototype.some', function (assert) {
+
+        });
+      });
     });
 
     runner.suite('Number', function (assert) {
@@ -523,10 +541,6 @@
         });
 
         runner.suite('HTMLDocument.prototype.$$', function (assert) {
-
-        });
-
-        runner.suite('HTMLDocument.prototype.$$$', function (assert) {
 
         });
       });
@@ -565,6 +579,14 @@
         runner.suite('HTMLElement.prototype.getPosition', function (assert) {
 
         });
+
+        runner.suite('HTMLElement.prototype.setDragAction', function (assert) {
+
+        });
+        
+        runner.suite('HTMLElement.prototype.setAbsolute', function (assert) {
+
+        });
       });
     });
 
@@ -595,7 +617,7 @@
 
     runner.suite('Math', function (assert) {
       runner.suite('Math.randomInt', function (assert) {
-
+        
       });
     });
   });

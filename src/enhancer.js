@@ -486,6 +486,12 @@
 
   /* Array.prototype */
   Object.defineProperties(Array.prototype, {
+    clone: {
+      value: function () {
+        return this.concat();
+      }
+    },
+
     first: {
       get: function () {
         return this[0];
@@ -562,9 +568,36 @@
         }
         return null;
       }
-    }
-  });
+    },
 
+    every: {
+      value: function (func) {
+        var i, ln;
+
+        for (i = 0, ln = this.length; i < ln; i += 1) {
+          if (!func(this[i], i, this)) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+    },
+
+    some: {
+      value: function (func) {
+        var i, ln;
+
+        for (i = 0, ln = this.length; i < ln; i += 1) {
+          if (func(this[i], i, this)) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+    },
+  });
 
   /* Number.prototype */
   Object.defineProperties(Number.prototype, {
@@ -590,31 +623,35 @@
       value: function () {
         return this.querySelectorAll.apply(this, arguments);
       }
-    },
+    }
+  });
 
-    $$$: {
-      enumerable: true,
-      value: function () {
-        return this.getElementById.apply(this, arguments);
+  /* HTMLElement */
+  Object.defineProperties(HTMLElement, {
+    ClientRectOverload: {
+      value: {
+        centerX: {
+          enumerable: true,
+          get: function () {
+            return (this.left + this.right) / 2;
+          }
+        },
+
+        centerY: {
+          enumerable: true,
+          get: function () {
+            return (this.top + this.bottom) / 2;
+          }
+        }
       }
     }
   });
 
   /* HTMLElement.prototype */
   Object.defineProperties(HTMLElement.prototype, {
-    $: {
-      enumerable: true,
-      value: function () {
-        return this.querySelector.apply(this, arguments);
-      }
-    },
+    $: Object.getOwnPropertyDescriptor(HTMLDocument.prototype, '$'),
 
-    $$: {
-      enumerable: true,
-      value: function () {
-        return this.querySelectorAll.apply(this, arguments);
-      }
-    },
+    $$: Object.getOwnPropertyDescriptor(HTMLDocument.prototype, '$$'),
 
     grab: {
       enumerable: true,
@@ -627,9 +664,7 @@
     adopt: {
       enumerable: true,
       value: function () {
-        Array.prototype.forEach.call(arguments, function (node) {
-          this.grab(node);
-        }.bind(this));
+        Array.prototype.forEach.call(arguments.length === 1 ? Array.from(arguments[0]) : arguments, this.grab.bind(this));
         return this;
       }
     },
@@ -669,6 +704,25 @@
       enumerable: true,
       value: function (topParent) {
         var
+          rect = this.getBoundingClientRect(),
+          parentRect = (topParent || document.body).getBoundingClientRect(),
+          coord = Object.create({}, HTMLElement.ClientRectOverload);
+
+          coord.left = rect.left - parentRect.left;
+          coord.top = rect.top - parentRect.top;
+          coord.width = rect.width;
+          coord.height = rect.height;
+          coord.right = coord.left + rect.width;
+          coord.bottom = coord.top + rect.height;
+
+          return coord;
+      }
+    },
+
+    /*getPosition: {
+      enumerable: true,
+      value: function (topParent) {
+        var
           parent,
           node = this,
           coord = {
@@ -676,7 +730,7 @@
             top: node.offsetTop
           };
 
-        topParent = topParent || document;
+        topParent = topParent || document.body;
         parent = node.offsetParent;
 
         while (parent && parent !== topParent) {
@@ -691,6 +745,51 @@
         coord.centerY = coord.top + node.scrollHeight / 2;
 
         return coord;
+      },
+    }*/
+
+    setDragAction: {
+      value: function (action, options) {
+        var
+          container = options.container || document,
+          mouseup = function (e) {
+            container.removeEventListener('mousemove', action, false);
+            container.removeEventListener('mouseup', mouseup, false);
+          };
+
+        action = action.bind(this);
+
+        this.addEventListener('mousedown', function (e) {
+          e.stop();
+          container.addEventListener('mousemove', action, false);
+          container.addEventListener('mouseup', mouseup, false);
+        }, false);
+
+        if (typeof options.mousedown === 'function') {
+          this.addEventListener('mousedown', options.mousedown, false);
+        }
+        if (typeof options.mouseup === 'function') {
+          this.addEventListener('mouseup', options.mouseup, false);
+        }
+
+        return this;
+      }
+    },
+
+    setAbsolute: {
+      value: function (bound) {
+        var
+          pos = this.getPosition(bound),
+          boundPos;
+
+        bound = bound || document.body;
+        boundPos = bound.getPosition();
+
+        this.style.left = pos.x - boundPos.x + 'px';
+        this.style.top = pos.y - boundPos.y + 'px';
+        this.style.position = 'absolute';
+
+        return this;
       }
     }
   });
