@@ -33,9 +33,10 @@
       fireEvent: {
         enumerable: true,
         value: function (name, args) {
-          var list = events[name].clone(), i, ln;
+          var list = events[name], i, ln;
 
           if (list) {
+            list = list.clone();
             args = Array.from(arguments).slice(1);
             for (i = 0, ln = list.length; i < ln; i += 1) {
               list[i].apply(this, args);

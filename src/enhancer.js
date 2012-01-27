@@ -779,14 +779,10 @@
     setAbsolute: {
       value: function (bound) {
         var
-          pos = this.getPosition(bound),
-          boundPos;
+          pos = this.getPosition(bound);
 
-        bound = bound || document.body;
-        boundPos = bound.getPosition();
-
-        this.style.left = pos.x - boundPos.x + 'px';
-        this.style.top = pos.y - boundPos.y + 'px';
+        this.style.left = pos.left + 'px';
+        this.style.top = pos.top + 'px';
         this.style.position = 'absolute';
 
         return this;

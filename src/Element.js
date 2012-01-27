@@ -33,8 +33,12 @@
 
     style: function (styles) {
       var style, str = '';
-      for (style in styles) {
-        str += style + ': ' + styles[style] + '; ';
+      if (typeof styles === 'string') {
+        str = styles;
+      } else {
+        for (style in styles) {
+          str += style + ': ' + styles[style] + '; ';
+        }
       }
       this.setAttribute('style', str);
     },
@@ -60,19 +64,19 @@
       var
         offsetX,
         offsetY,
-        boundPos = bound.getPos();
+        boundPos = bound.getPosition();
 
       bound.style.position = 'relative';
 
       this.setDragAction(function (e) {
-        this.style.left = e.clientX - boundPos.x - offsetX + 'px';
-        this.style.top = e.clientY - boundPos.y - offsetY + 'px';
+        this.style.left = e.clientX - boundPos.left - offsetX + 'px';
+        this.style.top = e.clientY - boundPos.top - offsetY + 'px';
       }, {
         mousedown: function (e) {
-          var pos = this.getPos(bound);
+          var pos = this.getPosition(bound);
           this.setAbsolute(bound);
-          offsetX = e.clientX - boundPos.x - parseInt(this.style.left, 10);
-          offsetY = e.clientY - boundPos.y - parseInt(this.style.top, 10);
+          offsetX = e.clientX - boundPos.left - parseInt(this.style.left, 10);
+          offsetY = e.clientY - boundPos.top - parseInt(this.style.top, 10);
           bound.appendChild(this);
         }
       })

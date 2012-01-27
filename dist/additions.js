@@ -884,14 +884,10 @@ Dual licensed under the MIT and GPL licenses.
     setAbsolute: {
       value: function (bound) {
         var
-          pos = this.getPosition(bound),
-          boundPos;
+          pos = this.getPosition(bound);
 
-        bound = bound || document.body;
-        boundPos = bound.getPosition();
-
-        this.style.left = pos.x - boundPos.x + 'px';
-        this.style.top = pos.y - boundPos.y + 'px';
+        this.style.left = pos.left + 'px';
+        this.style.top = pos.top + 'px';
         this.style.position = 'absolute';
 
         return this;
@@ -1078,8 +1074,12 @@ Dual licensed under the MIT and GPL licenses.
 
     style: function (styles) {
       var style, str = '';
-      for (style in styles) {
-        str += style + ': ' + styles[style] + '; ';
+      if (typeof styles === 'string') {
+        str = styles;
+      } else {
+        for (style in styles) {
+          str += style + ': ' + styles[style] + '; ';
+        }
       }
       this.setAttribute('style', str);
     },
@@ -1105,19 +1105,19 @@ Dual licensed under the MIT and GPL licenses.
       var
         offsetX,
         offsetY,
-        boundPos = bound.getPos();
+        boundPos = bound.getPosition();
 
       bound.style.position = 'relative';
 
       this.setDragAction(function (e) {
-        this.style.left = e.clientX - boundPos.x - offsetX + 'px';
-        this.style.top = e.clientY - boundPos.y - offsetY + 'px';
+        this.style.left = e.clientX - boundPos.left - offsetX + 'px';
+        this.style.top = e.clientY - boundPos.top - offsetY + 'px';
       }, {
         mousedown: function (e) {
-          var pos = this.getPos(bound);
+          var pos = this.getPosition(bound);
           this.setAbsolute(bound);
-          offsetX = e.clientX - boundPos.x - parseInt(this.style.left, 10);
-          offsetY = e.clientY - boundPos.y - parseInt(this.style.top, 10);
+          offsetX = e.clientX - boundPos.left - parseInt(this.style.left, 10);
+          offsetY = e.clientY - boundPos.top - parseInt(this.style.top, 10);
           bound.appendChild(this);
         }
       })
@@ -1170,9 +1170,10 @@ Dual licensed under the MIT and GPL licenses.
       fireEvent: {
         enumerable: true,
         value: function (name, args) {
-          var list = events[name].clone(), i, ln;
+          var list = events[name], i, ln;
 
           if (list) {
+            list = list.clone();
             args = Array.from(arguments).slice(1);
             for (i = 0, ln = list.length; i < ln; i += 1) {
               list[i].apply(this, args);
