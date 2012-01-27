@@ -591,6 +591,12 @@ Dual licensed under the MIT and GPL licenses.
 
   /* Array.prototype */
   Object.defineProperties(Array.prototype, {
+    clone: {
+      value: function () {
+        return this.concat();
+      }
+    },
+
     first: {
       get: function () {
         return this[0];
@@ -667,9 +673,36 @@ Dual licensed under the MIT and GPL licenses.
         }
         return null;
       }
-    }
-  });
+    },
 
+    every: {
+      value: function (func) {
+        var i, ln;
+
+        for (i = 0, ln = this.length; i < ln; i += 1) {
+          if (!func(this[i], i, this)) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+    },
+
+    some: {
+      value: function (func) {
+        var i, ln;
+
+        for (i = 0, ln = this.length; i < ln; i += 1) {
+          if (func(this[i], i, this)) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+    },
+  });
 
   /* Number.prototype */
   Object.defineProperties(Number.prototype, {
@@ -695,31 +728,35 @@ Dual licensed under the MIT and GPL licenses.
       value: function () {
         return this.querySelectorAll.apply(this, arguments);
       }
-    },
+    }
+  });
 
-    $$$: {
-      enumerable: true,
-      value: function () {
-        return this.getElementById.apply(this, arguments);
+  /* HTMLElement */
+  Object.defineProperties(HTMLElement, {
+    ClientRectOverload: {
+      value: {
+        centerX: {
+          enumerable: true,
+          get: function () {
+            return (this.left + this.right) / 2;
+          }
+        },
+
+        centerY: {
+          enumerable: true,
+          get: function () {
+            return (this.top + this.bottom) / 2;
+          }
+        }
       }
     }
   });
 
   /* HTMLElement.prototype */
   Object.defineProperties(HTMLElement.prototype, {
-    $: {
-      enumerable: true,
-      value: function () {
-        return this.querySelector.apply(this, arguments);
-      }
-    },
+    $: Object.getOwnPropertyDescriptor(HTMLDocument.prototype, '$'),
 
-    $$: {
-      enumerable: true,
-      value: function () {
-        return this.querySelectorAll.apply(this, arguments);
-      }
-    },
+    $$: Object.getOwnPropertyDescriptor(HTMLDocument.prototype, '$$'),
 
     grab: {
       enumerable: true,
@@ -732,9 +769,7 @@ Dual licensed under the MIT and GPL licenses.
     adopt: {
       enumerable: true,
       value: function () {
-        Array.prototype.forEach.call(arguments, function (node) {
-          this.grab(node);
-        }.bind(this));
+        Array.prototype.forEach.call(arguments.length === 1 ? Array.from(arguments[0]) : arguments, this.grab.bind(this));
         return this;
       }
     },
@@ -774,6 +809,25 @@ Dual licensed under the MIT and GPL licenses.
       enumerable: true,
       value: function (topParent) {
         var
+          rect = this.getBoundingClientRect(),
+          parentRect = (topParent || document.body).getBoundingClientRect(),
+          coord = Object.create({}, HTMLElement.ClientRectOverload);
+
+          coord.left = rect.left - parentRect.left;
+          coord.top = rect.top - parentRect.top;
+          coord.width = rect.width;
+          coord.height = rect.height;
+          coord.right = coord.left + rect.width;
+          coord.bottom = coord.top + rect.height;
+
+          return coord;
+      }
+    },
+
+    /*getPosition: {
+      enumerable: true,
+      value: function (topParent) {
+        var
           parent,
           node = this,
           coord = {
@@ -781,7 +835,7 @@ Dual licensed under the MIT and GPL licenses.
             top: node.offsetTop
           };
 
-        topParent = topParent || document;
+        topParent = topParent || document.body;
         parent = node.offsetParent;
 
         while (parent && parent !== topParent) {
@@ -796,6 +850,51 @@ Dual licensed under the MIT and GPL licenses.
         coord.centerY = coord.top + node.scrollHeight / 2;
 
         return coord;
+      },
+    }*/
+
+    setDragAction: {
+      value: function (action, options) {
+        var
+          container = options.container || document,
+          mouseup = function (e) {
+            container.removeEventListener('mousemove', action, false);
+            container.removeEventListener('mouseup', mouseup, false);
+          };
+
+        action = action.bind(this);
+
+        this.addEventListener('mousedown', function (e) {
+          e.stop();
+          container.addEventListener('mousemove', action, false);
+          container.addEventListener('mouseup', mouseup, false);
+        }, false);
+
+        if (typeof options.mousedown === 'function') {
+          this.addEventListener('mousedown', options.mousedown, false);
+        }
+        if (typeof options.mouseup === 'function') {
+          this.addEventListener('mouseup', options.mouseup, false);
+        }
+
+        return this;
+      }
+    },
+
+    setAbsolute: {
+      value: function (bound) {
+        var
+          pos = this.getPosition(bound),
+          boundPos;
+
+        bound = bound || document.body;
+        boundPos = bound.getPosition();
+
+        this.style.left = pos.x - boundPos.x + 'px';
+        this.style.top = pos.y - boundPos.y + 'px';
+        this.style.position = 'absolute';
+
+        return this;
       }
     }
   });
@@ -949,6 +1048,7 @@ Dual licensed under the MIT and GPL licenses.
 
   exports.Element = function (tag, options) {
     var element = document.createElement(tag), key;
+    options = options || {};
 
     for (key in options) {
       if (exports.Element.Mutators[key]) {
@@ -991,6 +1091,44 @@ Dual licensed under the MIT and GPL licenses.
     
     html: function (text) {
       this.innerHTML = text;
+    },
+
+    Absolute: function (bound) {
+      var self = this;
+      document.addEventListener('DOMNodeInserted', function setAbsolute(e) {
+        self.setAbsolute(bound);
+        document.removeEventListener('DOMNodeInserted', setAbsolute, false);
+      }, false);
+    },
+
+    Dragable: function (bound) {
+      var
+        offsetX,
+        offsetY,
+        boundPos = bound.getPos();
+
+      bound.style.position = 'relative';
+
+      this.setDragAction(function (e) {
+        this.style.left = e.clientX - boundPos.x - offsetX + 'px';
+        this.style.top = e.clientY - boundPos.y - offsetY + 'px';
+      }, {
+        mousedown: function (e) {
+          var pos = this.getPos(bound);
+          this.setAbsolute(bound);
+          offsetX = e.clientX - boundPos.x - parseInt(this.style.left, 10);
+          offsetY = e.clientY - boundPos.y - parseInt(this.style.top, 10);
+          bound.appendChild(this);
+        }
+      })
+    },
+
+    properties: function (properties) {
+      var key;
+
+      for (key in properties) {
+        this[key] = properties[key];
+      }
     }
   };
 
@@ -1004,44 +1142,58 @@ Dual licensed under the MIT and GPL licenses.
     var events = {};
 
     return {
-      on: {
+      addListener: {
         enumerable: true,
-        value: function (event, func, once) {
-          var self = this;
-          events[event] = events[event] || [];
-          events[event].include(once ? function onceWrapper() {
-            func.apply(this, arguments);
-            return once;
-          } : func);
+        value: function (name, func, once) {
+          var self = this, wrapper;
+
+          if (!events[name]) {
+            events[name] = [];
+          }
+
+          if (typeof func === 'function') {
+            if (once) {
+              wrapper = function () {
+                this.removeListener(name, wrapper);
+                return func.apply(this, arguments);
+              }.bind(this)
+              events[name].include(wrapper);
+            } else {
+              events[name].include(func);
+            }
+          }
+
           return this;
         }
       },
 
       fireEvent: {
         enumerable: true,
-        value: function (event, args) {
-          var funcs = events[event] || [], i, ln, once, toRemove = [];
-          for (i = 0, ln = funcs.length; i < ln; i += 1) {
-           once = funcs[i].apply(this, arguments.length > 2 ? Array.prototype.slice.call(arguments, 1) : Array.from(args));
-            if (once) {
-              toRemove.include(funcs[i]);
+        value: function (name, args) {
+          var list = events[name].clone(), i, ln;
+
+          if (list) {
+            args = Array.from(arguments).slice(1);
+            for (i = 0, ln = list.length; i < ln; i += 1) {
+              list[i].apply(this, args);
             }
           }
-          
-          while (toRemove.length > 0) {
-            this.removeListener(event, toRemove.shift());
-          }
+
           return this;
         }
       },
 
       removeListener: {
         enumerable: true,
-        value: function (event, func) {
-          if (func) {
-            events[event].remove(func);
-          } else {
-            events[event] = [];
+        value: function (name, func) {
+          var list = events[name];
+
+          if (Array.isArray(list)) {
+            if (typeof func === 'function') {
+              list.remove(func);
+            } else {
+              events[name] = [];
+            }
           }
           return this;
         }
