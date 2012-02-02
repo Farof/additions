@@ -6,16 +6,40 @@
       var c = new Color();
 
       assert.same(Object.keys(Object.properties(c)), ['red', 'green', 'blue', 'alpha']);
-      assert.between(c.red, 0, 255);
-      assert.between(c.green, 0, 255);
-      assert.between(c.blue, 0, 255);
-      assert.equal(c.alpha, 1);
+      assert.same(c.red, 0);
+      assert.same(c.green, 0);
+      assert.same(c.blue, 0);
+      assert.same(c.alpha, 255);
 
-      assert.same(Object.properties(new Color(34, 97, 23, 0.4)), { red: 34, green: 97, blue: 23, alpha: 0.4 });
+      console.log('prop', Object.properties, Object.properties(new Color()));
+
+      assert.same(Object.properties(new Color({
+        red: 34,
+        green: 97,
+        blue: 23,
+        alpha: 121
+      })), { red: 34, green: 97, blue: 23, alpha: 121 });
       //assert.same(Object.properties(Color.fromRGB()))
     });
 
-    runner.suite('Color.fromRGB', function (assert) {
+
+    runner.suite('Color.toHexPart', function (assert) {
+
+    });
+
+    runner.suite('Color.cutHex', function (assert) {
+
+    });
+
+    runner.suite('Color.isRGBA', function (assert) {
+
+    });
+
+    runner.suite('Color.isHex', function (assert) {
+
+    });
+
+    runner.suite('Color.isHSV', function (assert) {
 
     });
 
@@ -27,8 +51,48 @@
 
     });
 
+    runner.suite('Color.fromHSV', function (assert) {
+
+    });
+
+    runner.suite('Color.channel', function (assert) {
+
+    });
+
     runner.suite('Color.prototype', function (assert) {
-      runner.suite('Color.prototype.toRGB', function (assert) {
+      runner.suite('Color.prototype Events implementation', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.red', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.green', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.blue', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.alpha', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.serialize', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.set', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.scramble', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.reverse', function (assert) {
 
       });
 
@@ -37,6 +101,30 @@
       });
 
       runner.suite('Color.prototype.toHex', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.toHSV', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.fromRGBA', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.fromHex', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.fromHSV', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.clone', function (assert) {
+
+      });
+
+      runner.suite('Color.prototype.toString', function (assert) {
 
       });
     });

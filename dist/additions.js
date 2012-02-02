@@ -515,7 +515,7 @@ Dual licensed under the MIT and GPL licenses.
         var copy = {}, key;
 
         for (key in obj) {
-          if (typeof obj[key] !== 'function') {
+          if (typeof obj[key] !== 'function' && ((obj.constructor && obj.constructor !== Object) ? obj.constructor.prototype.propertyIsEnumerable(key) : true)) {
             copy[key] = obj[key];
           }
         }
@@ -951,6 +951,18 @@ Dual licensed under the MIT and GPL licenses.
   };
 
   Number.Range.implements({
+    min: {
+      enumerable: true,
+      writable: true,
+      value: 0
+    },
+
+    max: {
+      enumerable: true,
+      writable: true,
+      value: 100
+    },
+
     limit: {
       enumerable: true,
       value: function (value) {
@@ -965,73 +977,411 @@ Dual licensed under the MIT and GPL licenses.
 (function (exports) {
   "use strict";
 
-  var Color = exports.Color = function (r, g, b, a) {
-    this.red = r || Math.randomInt(255);
-    this.green = g || Math.randomInt(255);
-    this.blue = b || Math.randomInt(255);
-    this.alpha = typeof a === 'number' ? new Number.Range(1).limit(a) : 1;
+  var Events = exports.Events = function () {
+    var events = {};
+
+    return {
+      addListener: {
+        enumerable: true,
+        value: function (name, func, once) {
+          var self = this, wrapper;
+
+          if (!events[name]) {
+            events[name] = [];
+          }
+
+          if (typeof func === 'function') {
+            if (once) {
+              wrapper = function () {
+                this.removeListener(name, wrapper);
+                return func.apply(this, arguments);
+              }.bind(this)
+              events[name].include(wrapper);
+            } else {
+              events[name].include(func);
+            }
+          }
+
+          return this;
+        }
+      },
+
+      fireEvent: {
+        enumerable: true,
+        value: function (name, args) {
+          var list = events[name], i, ln;
+
+          if (list) {
+            list = list.clone();
+            args = Array.from(arguments).slice(1);
+            for (i = 0, ln = list.length; i < ln; i += 1) {
+              list[i].apply(this, args);
+            }
+          }
+
+          return this;
+        }
+      },
+
+      removeListener: {
+        enumerable: true,
+        value: function (name, func) {
+          var list = events[name];
+
+          if (Array.isArray(list)) {
+            if (typeof func === 'function') {
+              list.remove(func);
+            } else {
+              events[name] = [];
+            }
+          }
+          return this;
+        }
+      }
+    };
+  };
+
+}(typeof exports === 'undefined' ? window : exports));
+
+
+(function (exports) {
+  "use strict";
+
+  var Color = exports.Color = function (options) {
+    options = options || {};
+    this.red = options.red;
+    this.green = options.green;
+    this.blue = options.blue;
+    this.alpha = options.alpha;
   };
 
   Color.extends({
-    fromRGB: {
-      value: function (r, g, b) {
-        return new Color(r, g, b);
+    toHexPart: {
+      value: function (p) {
+        p = parseInt(p, 10);
+        if (isNaN(p)) {
+          return '00';
+        }
+        return '0123456789ABCDEF'.charAt((p - p % 16) / 16) +
+               '0123456789ABCDEF'.charAt(p % 16)
+      }
+    },
+
+    rgbaReg: {
+      value: /^(?:rgba\()?((?:\d{1,3},?(?:\s*)?){3})(?:,?(?:\s*)?(1|0(?:\.\d+)?))?\)?;?$/
+    },
+
+    hexReg: {
+      value: /^(#?)[\dabcdefABCDEF]{6}$/
+    },
+
+    hsvReg: {
+      value: /^.*$/
+    },
+
+    cutHex: {
+      value: function (h) {
+        return h.charAt(0) === '#' ? h.substring(1,7) : h;
+      }
+    },
+
+    isRGBA: {
+      enumerable: true,
+      value: function (rgba) {
+        var matches;
+
+        if (!this.rgbaReg.test(rgba)) {
+          return false;
+        } else {
+          matches = this.rgbaReg.exec(rgba);
+          if (matches && matches[1]) {
+            return matches[1].replace(/(,\s|\s|,)/g, ':').split(':').every(function (match, index) {
+              return match >= 0 && match <= 255;
+            }) && (matches[2] ? (matches[2] >= 0 && matches[2] <= 1) : true);
+          }
+          return false;
+        }
+      }
+    },
+
+    isHex: {
+      enumerable: true,
+      value: function (h) {
+        return this.hexReg.test(h);
+      }
+    },
+
+    isHSV: {
+      enumerable: true,
+      value: function (hsv) {
+        return this.hsvReg.test(hsv);
       }
     },
 
     fromRGBA: {
-      value: function (r, g, b, a) {
-        return new Color(r, g, b, a);
+      enumerable: true,
+      value: function (rgba) {
+        var matches, matchesRGB, alpha;
+
+        if (this.isRGBA(rgba)) {
+          matches = this.rgbaReg.exec(rgba), matchesRGB = matches[1].replace(/(,\s|\s|,)/g, ':').split(':');
+          alpha = Number(matches[2]);
+          return new Color({
+            red: parseInt(matchesRGB[0], 10),
+            green: parseInt(matchesRGB[1], 10),
+            blue: parseInt(matchesRGB[2], 10),
+            alpha: (typeof alpha === 'number') ? (alpha * 255) : 255
+          });
+        }
+        return null;
       }
     },
 
     fromHex: {
-      value: function (r, g, b) {
-        var h;
-        if (arguments.length === 1) {
-          h = r.replace('#', '');
-          r = h.substring(0, 2);
-          g = h.substring(2, 4);
-          b = h.substring(4, 6);
+      enumerable: true,
+      value: function (h) {
+        if (this.isHex(h)) {
+          return new Color({
+            red: parseInt(this.cutHex(h).substring(0, 2), 16),
+            green: parseInt(this.cutHex(h).substring(2, 4), 16),
+            blue: parseInt(this.cutHex(h).substring(4, 6), 16),
+            alpha: 255
+          });
         }
-        return new Color(parseInt(r, 16), parseInt(g, 16), parseInt(b, 16));
+        return null;
+      }
+    },
+
+    fromHSV: {
+      enumerable: true,
+      value: function (hsv) {
+        var matches;
+
+        if (this.isHex(hsv)) {
+          matches = this.hsvReg.exec(hsv);
+          return new Color({
+            
+          });
+        }
+        return null;
+      }
+    },
+
+    channel: {
+      value: {
+        red:    0,
+        green:  1,
+        blue:   2,
+        alpha:  3
       }
     }
-  })
+  });
+
+  Color.implements(new Events());
 
   Color.implements({
-    toRGB: {
+    _red:   { writable: true, enumerable: false, value: 0   },
+    _green: { writable: true, enumerable: false, value: 0   },
+    _blue:  { writable: true, enumerable: false, value: 0   },
+    _alpha: { writable: true, enumerable: false, value: 255 },
+
+    red: {
+      get: function () {
+        return this._red;
+      },
+      set: function (value) {
+        var changed;
+
+        value = typeof value === 'number' ? Math.max(0, Math.min(value, 255)) : this._red;
+        changed = value !== this._red;
+
+        this._red = value;
+
+        if (changed) {
+          this.fireEvent('change:red');
+        }
+      },
+      enumerable: true
+    },
+
+    green: {
+      get: function () {
+        return this._green;
+      },
+      set: function (value) {
+        var changed;
+
+        value = typeof value === 'number' ? Math.max(0, Math.min(value, 255)) : this._green;
+        changed = value !== this._green;
+
+        this._green = value;
+
+        if (changed) {
+          this.fireEvent('change:green');
+        }
+      },
+      enumerable: true
+    },
+
+    blue: {
+      get: function () {
+        return this._blue;
+      },
+      set: function (value) {
+        var changed;
+
+        value = typeof value === 'number' ? Math.max(0, Math.min(value, 255)) : this._blue;
+        changed = value !== this._blue;
+
+        this._blue = value;
+
+        if (changed) {
+          this.fireEvent('change:blue');
+        }
+      },
+      enumerable: true
+    },
+
+    alpha: {
+      get: function () {
+        return this._alpha;
+      },
+      set: function (value) {
+        var changed;
+
+        value = typeof value === 'number' ? Math.max(0, Math.min(value, 255)) : this._alpha;
+        changed = value !== this._alpha;
+
+        this._alpha = value;
+
+        if (changed) {
+          this.fireEvent('change:alpha');
+        }
+      },
+      enumerable: true
+    },
+
+    serialize: {
       enumerable: true,
       value: function () {
-        return 'rgb(' + this.red + ', ' + this.green + ', ' + this.blue +')';
+        return {
+          red: this.red,
+          green: this.green,
+          blue: this.blue,
+          alpha: this.alpha
+        };
+      }
+    },
+
+    set: {
+      value: function (data) {
+        var
+          changed = (typeof data.red    === 'number'  && data.red   !== this.red)
+                 || (typeof data.green  === 'number'  && data.green !== this.green)
+                 || (typeof data.blue   === 'number'  && data.blue  !== this.blue)
+                 || (typeof data.alpha  === 'number'  && data.alpha !== this.alpha),
+          prev = this.clone();
+
+        this.red = data.red;
+        this.green = data.green;
+        this.blue = data.blue;
+        this.alpha = data.alpha;
+
+        if (changed) {
+          this.fireEvent('change', this, prev);
+        }
+        return this;
+      }
+    },
+
+    scramble: {
+      value: function (opaque) {
+        this.set({
+          red: Math.randomInt(255),
+          green: Math.randomInt(255),
+          blue: Math.randomInt(255),
+          alpha: opaque ? 255 : Math.randomInt(255)
+        });
+        return this;
+      }
+    },
+
+    reverse: {
+      value: function () {
+        this.set({
+          red: 255 - this.red,
+          green: 255 - this.green,
+          blue: 255 - this.blue
+        });
+        return this;
+      }
+    },
+
+    toCommaList: {
+      value: function () {
+        var alpha = (this.alpha / 255).toFixed(2);
+        return this.red + ', ' + this.green + ', ' + this.blue + ', ' + (alpha === '1.00' ? '1' : alpha);
       }
     },
 
     toRGBA: {
-      enumerable: true,
       value: function () {
-        return 'rgba(' + this.red + ', ' + this.green + ', ' + this.blue + ', ' + this.alpha + ')';
-      }
-    },
-
-    toHexPart: {
-      value: function (n) {
-        var str = '0123456789ABCDEF';
-
-        n = parseInt(n, 10);
-        if (isNaN(n)) {
-          n = 0;
-        }
-        n = new Number.Range(255).limit(n);
-
-        return str.charAt((n - n % 16) / 16) + str.charAt(n % 16);
+        return 'rgba(' + this.toCommaList() + ')';
       }
     },
 
     toHex: {
-      enumerable: true,
-      value: function (prefix) {
-        return (prefix ? '#' : '') + this.toHexPart(this.red) + this.toHexPart(this.green) + this.toHexPart(this.blue);
+      value: function () {
+        return '#' + Color.toHexPart(this.red) + Color.toHexPart(this.green) + Color.toHexPart(this.blue);
+      }
+    },
+
+    toHSV: {
+      value: function () {
+        // console.log('HSV output not supported yet');
+        return 'HSV';
+      }
+    },
+
+    fromRGBA: {
+      value: function (rgba) {
+        var color = Color.fromRGBA(rgba);
+        if (color) {
+          this.set(color);
+        }
+        return this;
+      }
+    },
+
+    fromHex: {
+      value: function (h) {
+        var color = Color.fromHex(h);
+        if (color) {
+          this.set(color);
+        }
+        return this;
+      }
+    },
+
+    fromHSV: {
+      value: function (hsv) {
+        var color = Color.fromHSV(hsv);
+        if (color) {
+          this.set(color);
+        }
+        return this;
+      }
+    },
+
+    clone: {
+      value: function () {
+        return new Color(this);
+      }
+    },
+
+    toString: {
+      value: function () {
+        return JSON.stringify(this.serialize());
       }
     }
   });
@@ -1130,76 +1480,6 @@ Dual licensed under the MIT and GPL licenses.
         this[key] = properties[key];
       }
     }
-  };
-
-}(typeof exports === 'undefined' ? window : exports));
-
-
-(function (exports) {
-  "use strict";
-
-  var Events = exports.Events = function () {
-    var events = {};
-
-    return {
-      addListener: {
-        enumerable: true,
-        value: function (name, func, once) {
-          var self = this, wrapper;
-
-          if (!events[name]) {
-            events[name] = [];
-          }
-
-          if (typeof func === 'function') {
-            if (once) {
-              wrapper = function () {
-                this.removeListener(name, wrapper);
-                return func.apply(this, arguments);
-              }.bind(this)
-              events[name].include(wrapper);
-            } else {
-              events[name].include(func);
-            }
-          }
-
-          return this;
-        }
-      },
-
-      fireEvent: {
-        enumerable: true,
-        value: function (name, args) {
-          var list = events[name], i, ln;
-
-          if (list) {
-            list = list.clone();
-            args = Array.from(arguments).slice(1);
-            for (i = 0, ln = list.length; i < ln; i += 1) {
-              list[i].apply(this, args);
-            }
-          }
-
-          return this;
-        }
-      },
-
-      removeListener: {
-        enumerable: true,
-        value: function (name, func) {
-          var list = events[name];
-
-          if (Array.isArray(list)) {
-            if (typeof func === 'function') {
-              list.remove(func);
-            } else {
-              events[name] = [];
-            }
-          }
-          return this;
-        }
-      }
-    };
   };
 
 }(typeof exports === 'undefined' ? window : exports));
