@@ -410,7 +410,7 @@
         var copy = {}, key;
 
         for (key in obj) {
-          if (typeof obj[key] !== 'function') {
+          if (typeof obj[key] !== 'function' && ((obj.constructor && obj.constructor !== Object) ? obj.constructor.prototype.propertyIsEnumerable(key) : true)) {
             copy[key] = obj[key];
           }
         }

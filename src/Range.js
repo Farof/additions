@@ -10,6 +10,18 @@
   };
 
   Number.Range.implements({
+    min: {
+      enumerable: true,
+      writable: true,
+      value: 0
+    },
+
+    max: {
+      enumerable: true,
+      writable: true,
+      value: 100
+    },
+
     limit: {
       enumerable: true,
       value: function (value) {
