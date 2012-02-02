@@ -4,9 +4,9 @@ DIST=dist
 LIB=src/lib/uuid.js
 SRC=src/enhancer.js \
     src/Range.js \
+    src/interfaces/Events.js \
     src/Color.js \
     src/Element.js \
-    src/interfaces/Events.js \
     src/interfaces/Collection.js \
     src/interfaces/Map.js
 OUT=${DIST}/additions.js
