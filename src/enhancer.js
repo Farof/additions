@@ -223,6 +223,8 @@
             return a.length === b.length && a.every(function (value, index) {
               return Object.same(value, b[index]);
             });
+          } else if (typeof a.isEqualNode === 'function' || b.isEqualNode === 'function') {
+            return typeof a.isEqualNode === 'function' && typeof b.isEqualNode === 'function' && a.isEqualNode(b);
           } else {
             return Array.isArray(a) === Array.isArray(b) &&
                     Object.keys(a).length === Object.keys(b).length &&
@@ -388,6 +390,8 @@
 
             ret = ret.substring(0, ret.length - cr.length - 1) + '\n' + '\t'.repeat(depth - 1) + ']';
             return ret;
+          } else if (typeof obj.nodeType === 'number') {
+            return obj.toString();
           } else {
             depth = depth || 1;
             cr = '\n' + '\t'.repeat(depth);
