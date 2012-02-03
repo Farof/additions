@@ -415,8 +415,31 @@
         });
 
         runner.suite('Function.prototype.delay', function (assert) {
+          var mark = {};
 
-        });
+          (function () {
+            mark.a = 3;
+          }).delay();
+
+          (function () {
+            mark.b = 7;
+          }).delay(200);
+
+          (function () {
+            mark.c = this;
+          }).delay(300, 42);
+
+          (function () {
+            mark.d = this;
+          }).delay(400);
+
+          return function (assert) {
+            assert.equal(mark.a, 3);
+            assert.equal(mark.b, 7);
+            assert.equal(mark.c, 42);
+            assert.isUndefined(mark.d);
+          };
+        }, 500);
 
         runner.suite('Function.prototype.unshift', function (assert) {
           var i = 0, u = 0, f = function () {
@@ -456,7 +479,39 @@
     runner.suite('Event', function (assert) {
       runner.suite('Event.prototype', function (assert) {
         runner.suite('Event.prototype.stop', function (assert) {
+          var
+            mark = {
+              capture: false,
+              bubble: false,
+              target: false
+            },
+            bubble = function () {
+              mark.bubble = true;
+              document.body.removeEventListener('click', bubble, false);
+            },
+            capture = function (e) {
+              e.stop();
+              mark.capture = true;
+              document.body.removeEventListener('click', capture, true);
+            },
+            target = function (e) {
+              mark.target = true;
+              document.body.removeEventListener('click', target, false);
+            };
 
+          document.body.addEventListener('click', bubble, false);
+          document.body.addEventListener('click', capture, true);
+          document.$('#tests').addEventListener('click', target, false);
+
+          assert.equal(mark.capture, false);
+          assert.equal(mark.bubble, false);
+          assert.equal(mark.target, false);
+
+          document.$('#tests').click();
+
+          assert.equal(mark.capture, true);
+          assert.equal(mark.bubble, false);
+          assert.equal(mark.target, false);
         });
       });
     });
@@ -464,7 +519,7 @@
     runner.suite('Array', function (assert) {
       runner.suite('Array.from', function (assert) {
         assert.type(Array.from, 'function');
-        
+
         assert.same(Array.from(), []);
         assert.same(Array.from([3, 4, 5]), [3, 4, 5]);
         assert.same(Array.from({ a: 1, b: 2, c: 3}), [{ a: 1, b: 2, c: 3}]);
@@ -475,53 +530,147 @@
 
       runner.suite('Array.prototype', function (assert) {
         runner.suite('Array.prototype.clone', function (assert) {
-          var ar = [34, 32, 67, 98], clone = ar.clone();
+          var ar = [34, 32, 67, 98], clone;
+
+          assert.type(ar.clone, 'function');
+
+          clone = ar.clone();
+
           assert.same(ar, clone);
           assert.isFalse(ar === clone);
         });
 
         runner.suite('Array.prototype.first', function (assert) {
-
+          assert.isUndefined([].first);
+          assert.equal(['', 3, 4, '132'].first, '');
+          assert.equal([0, 45, 'aze'].first, 0);
+          assert.equal([42, 67].first, 42);
         });
 
         runner.suite('Array.prototype.last', function (assert) {
-
+          assert.isUndefined([].last);
+          assert.equal(['132', 3, 4, ''].last, '');
+          assert.equal(['aze', 45, 0].last, 0);
+          assert.equal([42, 67].last, 67);
         });
 
         runner.suite('Array.prototype.contains', function (assert) {
+          assert.type([].contains, 'function');
 
+          assert.isFalse([].contains(Object.undefined));
+          assert.isTrue([Object.undefined].contains(Object.undefined));
+          assert.isTrue([3, 5, 'aez', '', 9].contains(''));
+          assert.isTrue([3, 5, 'aez', 0, 9].contains(0));
+          assert.isFalse([3, 5, 'aez', '', 9].contains(42));
         });
 
         runner.suite('Array.prototype.match', function (assert) {
+          var
+            obj = { magic: 42 },
+            obj2 = { magic: 24 },
+            obj3 = { magic: 42 },
+            f = function (item) {
+              return typeof item === 'object' && item.magic === 42;
+            };
 
+          assert.type([].match, 'function');
+
+          assert.equal([3, 4, 5].match(f), Object.undefined);
+          assert.equal([3, obj, 4, obj2, 6, obj3, 5].match(f), obj);
         });
 
         runner.suite('Array.prototype.lastMatch', function (assert) {
+          var
+            obj = { magic: 42 },
+            obj2 = { magic: 24 },
+            obj3 = { magic: 42 },
+            f = function (item) {
+              return typeof item === 'object' && item.magic === 42;
+            };
 
+          assert.type([].lastMatch, 'function');
+
+          assert.equal([3, 4, 5].lastMatch(f), Object.undefined);
+          assert.equal([3, obj, 4, obj2, 6, obj3, 5].lastMatch(f), obj3);
         });
 
         runner.suite('Array.prototype.include', function (assert) {
+          var ar = [4, 3, 5];
 
+          assert.type([].include, 'function');
+
+          assert.equal(ar.length, 3);
+          assert.isFalse(ar.contains(42));
+          assert.equal(ar.last, 5);
+
+          assert.equal(ar.include(42), ar);
+
+          assert.equal(ar.length, 4);
+          assert.isTrue(ar.contains(42));
+          assert.equal(ar.last, 42);
+
+          ar.include(24);
+          assert.equal(ar.length, 5);
+          assert.isTrue(ar.contains(24));
+          assert.equal(ar.last, 24);
+
+          ar.include(42);
+          assert.equal(ar.length, 5);
+          assert.isTrue(ar.contains(42));
+          assert.equal(ar.last, 24);
         });
 
         runner.suite('Array.prototype.merge', function (assert) {
+          var ar = [];
 
+          assert.type([].merge, 'function');
+
+          assert.same(ar.merge(), []);
+          assert.same(ar.merge(7), []);
+          assert.same(ar.merge([]), []);
+          assert.same(ar.merge([1, 5, 3]), [1, 5, 3]);
+          assert.same(ar.merge([42, 5, 13]), [1, 5, 3, 42, 13]);
         });
 
         runner.suite('Array.prototype.remove', function (assert) {
           var f = function () {}, ar = [23, 54, 67, f, 'aze', 0];
-          ar.remove(54);
+
+          assert.type(ar.remove, 'function');
+
+          assert.equal(ar.remove(), ar)
+          assert.same(ar, [23, 54, 67, f, 'aze', 0]);
+
+          ar.remove(54)
           assert.same(ar, [23, 67, f, 'aze', 0]);
+
           ar.remove(f);
           assert.same(ar, [23, 67, 'aze', 0]);
         });
 
         runner.suite('Array.prototype.every', function (assert) {
+          var f = function (item) {
+            return typeof item === 'number';
+          }
 
+          assert.type([].every, 'function');
+
+          assert.isTrue([].every(f));
+          assert.isFalse(['RE', null].every(f));
+          assert.isFalse([43, 'RE', 34, null].every(f));
+          assert.isTrue([3, 5, 2, 42].every(f));
         });
-        
-        runner.suite('Array.prototype.some', function (assert) {
 
+        runner.suite('Array.prototype.some', function (assert) {
+          var f = function (item) {
+            return typeof item === 'number';
+          }
+
+          assert.type([].some, 'function');
+
+          assert.isTrue([].some(f));
+          assert.isFalse(['RE', null].some(f));
+          assert.isTrue([43, 'RE', 34, null].some(f));
+          assert.isTrue([3, 5, 2, 42].some(f));
         });
       });
     });
