@@ -553,9 +553,12 @@
     merge: {
       value: function (items) {
         var i, ln;
+        items = Array.isArray(items) ? items : [];
+
         for (i = 0, ln = items.length; i < ln; i += 1) {
           this.include(items[i], true);
         }
+
         return this;
       }
     },
@@ -564,9 +567,9 @@
       value: function (item) {
         var i = this.indexOf(item);
         if (i > -1) {
-          return this.splice(i, 1);
+          this.splice(i, 1);
         }
-        return null;
+        return this;
       }
     },
 
@@ -594,7 +597,7 @@
           }
         }
 
-        return false;
+        return this.length > 0 ? false : true;
       }
     },
   });
