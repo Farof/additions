@@ -678,7 +678,22 @@
     runner.suite('Number', function (assert) {
       runner.suite('Number.prototype', function (assert) {
         runner.suite('Number.prototype.bounds', function (assert) {
+          assert.type((4).bounds, 'function');
 
+          assert.equal((4).bounds(), 4);
+          assert.equal((4).bounds(0), 4);
+          assert.equal((4).bounds(10), 4);
+          assert.equal((4).bounds(1), 1);
+          assert.equal((4).bounds(0, 3), 3);
+          assert.equal((4).bounds(-6), 0);
+
+          assert.equal((-4).bounds(), 0);
+          assert.equal((-4).bounds(0), 0);
+          assert.equal((-4).bounds(10), 0);
+          assert.equal((-4).bounds(1), 0);
+          assert.equal((-4).bounds(0, 3), 0);
+          assert.equal((-4).bounds(-6), -4);
+          assert.equal((-4).bounds(-2), -2);
         });
       });
     });
