@@ -701,11 +701,21 @@
     runner.suite('HTMLDocument', function (assert) {
       runner.suite('HTMLDocument.prototype', function (assert) {
         runner.suite('HTMLDocument.prototype.$', function (assert) {
+          assert.type(document.$, 'function');
 
+          assert.error(function () { document.$(); });
+          assert.error(function () { document.$(''); });
+          assert.equal(document.$('aze'), null);
+          assert.equal(document.$('#tests'), document.querySelector('#tests'));
         });
 
         runner.suite('HTMLDocument.prototype.$$', function (assert) {
+          assert.type(document.$$, 'function');
 
+          assert.error(function () { document.$$(); });
+          assert.error(function () { document.$$(''); });
+          assert.same(document.$$('aze'), {});
+          assert.same(document.$$('.testsuite'), document.querySelectorAll('.testsuite'));
         });
       });
     });
