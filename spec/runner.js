@@ -209,7 +209,6 @@
 
         
       if (pending.length > 0) {
-        //console.log('prouf: ', pending.length);
         setGlobalTitle();
       }
 
