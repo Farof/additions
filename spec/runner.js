@@ -82,13 +82,30 @@
         isHTML: true
       };
     },
-    
+
     between: function (value, min, max) {
       var passed = value >= min && value <= max;
       return {
         passed: passed,
         msg: passed ? (value + ' is between ' + min + ' and ' + max) : (value + ' should be between ' + min + ' and ' + max)
+      };
+    },
+
+    error: function (func) {
+      var passed = false;
+
+      try {
+        func();
+      } catch (e) {
+        passed = true;
       }
+
+      return {
+        passed: passed,
+        msg: (passed ? (Object.describe(func).wrapTag('pre') + '\nthrowed an error') : ('expected\n' + Object.describe(func).wrapTag('pre') + '\nto throw an error')),
+        isHTML: true
+      };
+      
     }
   };
 
