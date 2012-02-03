@@ -172,6 +172,10 @@
           assert.isFalse(Object.same([4, 2], [2]));
           assert.isFalse(Object.same([4, 2], [2, 4]));
         });
+
+        runner.suite('DOMNode', function (assert) {
+          
+        });
       });
 
       runner.suite('Object.forEach', function (assert) {
