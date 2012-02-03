@@ -16,6 +16,7 @@
         if (isNaN(p)) {
           return '00';
         }
+        p = p % 256;
         return '0123456789ABCDEF'.charAt((p - p % 16) / 16) +
                '0123456789ABCDEF'.charAt(p % 16)
       }
@@ -35,7 +36,7 @@
 
     cutHex: {
       value: function (h) {
-        return h.charAt(0) === '#' ? h.substring(1,7) : h;
+        return h.charAt(0) === '#' ? h.substring(1,7) : h.substring(0, 6);
       }
     },
 
