@@ -23,6 +23,10 @@ body {
   text-align: left;
 }
 
+#tests > h1.hasAsyncPending {
+  background-color: lightblue;
+}
+
 .hidePassed .testsuite.passed:not(:hover) .test.passed {
   display: none;
 }
@@ -33,6 +37,10 @@ body {
 
 .testsuite.empty > .testsuite-title {
   background-color: orange;
+}
+
+.testsuite.asyncPending > .testsuite-title {
+  background-color: lightblue;
 }
 
 .testsuite > .testsuite {

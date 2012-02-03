@@ -117,7 +117,31 @@
           'class': 'testsuite-title',
           text: name
         })
-      );
+      ), timer;
+
+      suite.setAsync = function (delay) {
+        var
+          title = suite.querySelector('.testsuite-title'),
+          i = 0,
+          update = function () {
+            i += 1;
+            if (i * 50 > delay) {
+              clearInterval(timer);
+              title.textContent = name + ' (validation in 0ms)';
+            } else {
+              title.textContent = name + ' (validation in ' + (delay - i * 50) + 'ms)';
+            }
+          };
+        suite.classList.add('asyncPending');
+        timer = setInterval(update, 50);
+      };
+
+      suite.stopAsync = function () {
+        clearInterval(timer);
+        suite.classList.remove('asyncPending');
+        suite.querySelector('.testsuite-title').textContent = name;
+      };
+
       this.stack.last.appendChild(suite);
       this.stack.push(suite);
       return suite;
@@ -127,43 +151,89 @@
       return this.stack.pop();
     },
 
-    suite: function (name, callback) {
+    suite: function (name, callback, asyncTimer) {
       var
         suite = this.stackPush(name),
-        error = false;
+        wrapper = assertWrapper(suite),
+        asyncValidation,
+        error = false,
+        fail = function (err) {
+          suite.grab(this.getTestNode(
+            'failed',
+            'ERROR',
+            err.message
+          ));
+        }.bind(this),
+        after;
 
       try {
-        callback(assertWrapper(suite));
+        asyncValidation = callback(wrapper);
+        if (typeof asyncValidation === 'function') {
+          asyncTimer = asyncTimer || 1000;
+          suite.setAsync(asyncTimer);
+          setTimeout(function () {
+            try {
+              asyncValidation(wrapper);
+              after();
+            } catch (err) {
+              fail(err);
+            }
+          }, asyncTimer);
+        }
       } catch (err) {
-        suite.grab(this.getTestNode(
-          'failed',
-          'ERROR',
-          err.message
-        ));
+        fail(err);
       }
 
-      this.afterSuite();
+      after = this.afterSuite(typeof asyncValidation === 'function');
+
+      if (typeof asyncValidation !== 'function') {
+        after();
+      }
     },
 
-    afterSuite: function () {
+    afterSuite: function (async) {
       var
         last = this.stackPop(),
-        nb = last.querySelectorAll('.test').length,
-        failed = last.querySelectorAll('.failed').length,
-        title = last.querySelector('.testsuite-title'),
-        all = document.$('#tests');
+        all = document.$('#tests'),
+        pending = all.querySelectorAll('.asyncPending'),
+        title = all.$('h1'),
+        setGlobalTitle = function () {
+          pending = all.querySelectorAll('.asyncPending').length;
+          title.textContent = 'Tests (' + all.$$('.test.passed').length + '/' + all.$$('.test').length + ')' + ((typeof pending === 'number' && pending > 0) ? ' (' + pending + ' async validation pending)' : '');
+          if (typeof pending === 'number' && pending > 0) {
+            title.classList.add('hasAsyncPending');
+          } else {
+            title.classList.remove('hasAsyncPending');
+          }
+        };
 
-      title.textContent = title.textContent + ' (' + (nb - failed) + '/' + nb + ')'
-
-      if (nb === 0) {
-        last.classList.add('empty');
+        
+      if (pending.length > 0) {
+        //console.log('prouf: ', pending.length);
+        setGlobalTitle();
       }
 
-      if (failed === 0) {
-        last.classList.add('passed');
-      }
+      return function () {
+        var
+          nb = last.querySelectorAll('.test').length,
+          failed = last.querySelectorAll('.failed').length,
+          title = last.querySelector('.testsuite-title');
 
-      all.$('h1').textContent = 'Tests (' + all.$$('.test.passed').length + '/' + all.$$('.test').length + ')';
+        if (last.classList.contains('asyncPending')) {
+          last.stopAsync();
+        }
+        title.textContent = title.textContent + ' (' + (nb - failed) + '/' + nb + ')'
+
+        if (nb === 0) {
+          last.classList.add('empty');
+        }
+
+        if (failed === 0) {
+          last.classList.add('passed');
+        }
+
+        setGlobalTitle();
+      };
     },
 
     write: function (suite, test) {
