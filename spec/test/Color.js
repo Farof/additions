@@ -11,8 +11,6 @@
       assert.same(c.blue, 0);
       assert.same(c.alpha, 255);
 
-      console.log('prop', Object.properties, Object.properties(new Color()));
-
       assert.same(Object.properties(new Color({
         red: 34,
         green: 97,
