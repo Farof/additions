@@ -442,7 +442,7 @@
         var func = this;
         setTimeout(function () {
           func.call(bind);
-        }, delay);
+        }, delay || 4);
       }
     },
 
