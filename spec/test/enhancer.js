@@ -757,13 +757,16 @@
     runner.suite('String', function (assert) {
       runner.suite('String.prototype', function (assert) {
         runner.suite('String.prototype.contains', function (assert) {
-        assert.isTrue('yeahhehe'.contains(''));
+          assert.type('glop'.contains, 'function');
+
+          assert.isTrue('yeahhehe'.contains(''));
           assert.isTrue('proufyeahglop'.contains('eahg'));
           assert.isFalse('glopgneh'.contains('grouf'));
         });
 
         runner.suite('String.prototype.repeat', function (assert) {
           assert.type('glop'.repeat, 'function');
+
           assert.equal('glop'.repeat(0), '');
           assert.equal('glop'.repeat(-1), '');
           assert.equal('glop'.repeat(1), 'glop');
