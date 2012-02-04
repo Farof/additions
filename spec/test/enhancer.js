@@ -727,31 +727,113 @@
     runner.suite('HTMLElement', function (assert) {
       runner.suite('HTMLElement.prototype', function (assert) {
         runner.suite('HTMLElement.prototype.$', function (assert) {
+          var root = document.body.children[0];
+          assert.type(root.$, 'function');
 
+          assert.error(function () { root.$(); });
+          assert.error(function () { root.$(''); });
+          assert.equal(root.$('aze'), null);
+          assert.equal(root.$('#tests'), root.querySelector('#tests'));
         });
 
         runner.suite('HTMLElement.prototype.$$', function (assert) {
+          var root = document.body.children[0];
+          assert.type(root.$$, 'function');
 
-        });
-
-        runner.suite('HTMLElement.prototype.grab', function (assert) {
-
-        });
-
-        runner.suite('HTMLElement.prototype.adopt', function (assert) {
-
-        });
-
-        runner.suite('HTMLElement.prototype.unlaod', function (assert) {
-
+          assert.error(function () { root.$$(); });
+          assert.error(function () { root.$$(''); });
+          assert.same(root.$$('aze'), {});
+          assert.same(root.$$('.testsuite'), root.querySelectorAll('.testsuite'));
         });
 
         runner.suite('HTMLElement.prototype.empty', function (assert) {
+          var root = document.$('#sandbox'), el = document.createElement('div');
 
+          assert.type(root.empty, 'function');
+
+          runner.cleanSandbox();
+          assert.equal(root.children.length, 0);
+          root.appendChild(el);
+          assert.equal(root.children.length, 1);
+          assert.equal(root.children[0], el);
+          assert.equal(root.empty(), root);
+          assert.equal(root.children.length, 0);
+        });
+
+        runner.suite('HTMLElement.prototype.grab', function (assert) {
+          var root = document.$('#sandbox'), el = document.createElement('div');
+
+          assert.type(root.grab, 'function');
+
+          assert.equal(root.grab(el), root);
+          assert.equal(root.children.length, 1);
+          assert.equal(root.children[0], el);
+          root.empty();
+        });
+
+        runner.suite('HTMLElement.prototype.adopt', function (assert) {
+          var
+            root = document.$('#sandbox'),
+            el = document.createElement('div'),
+            el2 = document.createElement('p');
+
+          assert.type(root.adopt, 'function');
+
+          assert.equal(root.adopt(el, el2), root);
+          assert.equal(root.children.length, 2);
+          assert.equal(root.children[0], el);
+          assert.equal(root.children[1], el2);
+
+          root.empty();
+          assert.equal(root.children.length, 0);
+          root.adopt([el, el2]);
+          assert.equal(root.children.length, 2);
+          assert.equal(root.children[0], el);
+          assert.equal(root.children[1], el2);
+          root.empty();
+        });
+
+        runner.suite('HTMLElement.prototype.unload', function (assert) {
+          var
+            root = document.$('#sandbox'),
+            el = document.createElement('div'),
+            el2 = document.createElement('p');
+
+          assert.type(el.unload, 'function');
+
+          root.adopt(el, el2);
+          assert.equal(root.children.length, 2);
+
+          assert.equal(el.parentNode, root);
+          assert.equal(el.unload(), el);
+          assert.equal(el.parentNode, null);
+
+          assert.equal(root.children.length, 1);
+          assert.equal(root.children[0], el2);
+          root.empty();
         });
 
         runner.suite('HTMLElement.prototype.replaces', function (assert) {
+          var
+            root = document.$('#sandbox'),
+            el = document.createElement('div'),
+            el2 = document.createElement('p');
 
+          assert.type(el2.replaces, 'function');
+
+          root.grab(el);
+          assert.equal(root.children.length, 1);
+          assert.equal(root.children[0], el);
+
+          assert.equal(el.parentNode, root);
+          assert.equal(el2.parentNode, null);
+          assert.equal(el2.replaces(el), el2);
+          assert.equal(el.parentNode, null);
+          assert.equal(el2.parentNode, root);
+
+          assert.equal(root.children.length, 1);
+          assert.equal(root.children[0], el2);
+          root.empty();
         });
 
         runner.suite('HTMLElement.prototype.getPosition', function (assert) {
