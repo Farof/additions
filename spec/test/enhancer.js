@@ -837,13 +837,33 @@
         });
 
         runner.suite('HTMLElement.prototype.getPosition', function (assert) {
+          var el = document.createElement('div'), pos;
+          el.setAttribute('style', 'position: absolute; left: 312px; top: 13px; width: 435px; height: 37px;')
 
+          assert.type(el.getPosition, 'function');
+
+          document.body.grab(el);
+          pos = el.getPosition();
+
+          assert.type(pos, 'object');
+          assert.same(pos, {
+            top: 13,
+            height: 37,
+            bottom: 50,
+            left: 312,
+            width: 435,
+            right: 747,
+            centerX: 529.5,
+            centerY: 31.5
+          });
+
+          el.unload();
         });
 
         runner.suite('HTMLElement.prototype.setDragAction', function (assert) {
 
         });
-        
+
         runner.suite('HTMLElement.prototype.setAbsolute', function (assert) {
 
         });

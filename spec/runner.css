@@ -7,6 +7,7 @@ body {
   background-color: ivory;
   font-family: Arial;
   font-size: 0.8em;
+  position: relative;
 }
 
 #content {
